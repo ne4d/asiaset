@@ -1,0 +1,101 @@
+/* Стили для иконок */
+.btn-icon {
+    background: none;
+    border: none;
+    color: azure;
+    /* font-size: 14px; */
+    cursor: pointer;
+    /* padding: 4px; */
+    transition: transform 0.2s ease, color 0.2s ease;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+    /* Увеличение кнопки при наведении */
+    color: #000000;
+    /* Синий цвет для наведения */
+}
+
+.btn-icon.btn-success {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.btn-icon.btn-success:hover {
+    transform: scale(1.2);
+}
+
+.container {
+    padding: 0;
+}
+
+.table-container {
+    /* display: flex; */
+    justify-content: center;
+}
+
+/* CSS-классы для колонок */
+.col-code {
+    width: 65px;
+}
+
+.rtable .col-code {
+    color: white;
+}
+
+.rtable .col-name {
+    width: 100% !important;
+    color: white;
+}
+
+.rtable .col-actions {
+    color: white;
+    width: 65px;
+}
+
+.col-actions-center {
+    text-align: center;
+    /* Горизонтальное выравнивание */
+    vertical-align: middle;
+    /* Вертикальное выравнивание */
+}
+
+.add-group-width {
+    display: flex;
+    margin-bottom: 10px;
+    /* position: "relative"; */
+}
+
+.add-group-width input {
+    width: calc(100% - 60px);
+    margin-right: 3px;
+}
+
+.form-control {
+    border-color: #000000;
+    /* Зелёный цвет рамки */
+}
+
+input.form-control:focus {
+    border-color: #ffffff;
+    /* Зелёный цвет рамки */
+    outline: none;
+    box-shadow: 0 0 5px #212121;
+}
+
+/* Убираем границу справа для второй колонки */
+.rtable td:nth-child(2),
+.rtable th:nth-child(2) {
+  border-right: none; /* Принудительно убираем границу */
+}
+
+/* Убираем границу слева для третьей колонки */
+.rtable td:nth-child(3),
+.rtable th:nth-child(3) {
+  border-left: none; /* Принудительно убираем границу */
+}
