@@ -1,0 +1,111 @@
+/*!
+// CSS only Responsive Tables
+// http://dbushell.com/2016/03/04/css-only-responsive-tables/
+// by David Bushell
+*/
+
+.rtable {
+  /*!
+    // IE needs inline-block to position scrolling shadows otherwise use:
+    // display: block;
+    // max-width: min-content;
+    */
+  display: inline-block;
+  vertical-align: top;
+
+
+  width: 100%;
+  max-width: 100%; /* Гарантирует, что таблица будет занимать всю ширину */
+  table-layout: fixed; /* Обеспечивает равномерное распределение ширины */
+
+  overflow-x: auto;
+
+  /* // optional - looks better for small cell values */
+  white-space: nowrap;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+
+  /* table-layout: auto; */
+  table-layout: fixed;
+}
+
+.rtable {
+  /* // optional - enable iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+
+  /* // scrolling shadows */
+  background: radial-gradient(left, ellipse, rgba(0, 0, 0, .2) 0%, rgba(0, 0, 0, 0) 75%) 0 center,
+    radial-gradient(right, ellipse, rgba(0, 0, 0, .2) 0%, rgba(0, 0, 0, 0) 75%) 100% center;
+  background-size: 10px 100%, 10px 100%;
+  background-attachment: scroll, scroll;
+  background-repeat: no-repeat;
+}
+
+/* // change these gradients from white to your background colour if it differs
+  // gradient on the first cells to hide the left shadow */
+.rtable td:first-child {
+  /* background-image: linear-gradient(to right, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background-repeat: no-repeat;
+  background-size: 20px 100%; */
+  height: 55px;
+}
+
+/* // gradient on the last cells to hide the right shadow */
+.rtable td:last-child {
+  /* background-image: linear-gradient(to left, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  background-size: 20px 100%; */
+}
+
+.rtable th {
+  font-size: 11px;
+  text-align: left;
+  text-transform: uppercase;
+  background: #212121;
+}
+
+.rtable th,
+.rtable td {
+  padding: 6px 12px;
+  border: 1px solid #d9d7ce;
+}
+
+table {
+  margin-bottom: 30px;
+}
+
+/* стили колонок */
+.rtable .col-code {
+  width: 65px;
+  color: white;
+}
+
+.rtable .col-name {
+  /* width: 100% !important; */
+  /* width: 100%; */
+  /* width: auto; */
+  color: white;
+  word-wrap: nowrap;
+  flex-grow: 1; /* Растягивает эту колонку */
+  text-align: left; /* Выравнивает текст по левому краю */
+}
+
+.rtable .col-actions {
+  color: white;
+  width: 65px;
+}
+
+.rtable .col-meas {
+  color: white;
+  width: 100px;
+}
+
+.col-actions-center {
+  text-align: center;
+  /* Горизонтальное выравнивание */
+  vertical-align: middle;
+  /* Вертикальное выравнивание */
+}

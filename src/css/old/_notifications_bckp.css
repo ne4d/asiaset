@@ -1,7 +1,6 @@
-/* Page */
-
 body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*background-color: #d0e4fc;*/
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 14px;
 }
 
@@ -79,11 +78,10 @@ h1 {
 
 #notification-container {
     display: block;
-    position: fixed; /* Фиксированное положение */
-    bottom: 10px; /* Расстояние от нижнего края экрана */
-    right: 10px; /* Расстояние от правого края экрана */
-    z-index: 1000; /* Поверх всех элементов */
-    pointer-events: none; /* Уведомления не мешают кликам по другим элементам */
+    position: absolute;
+    /* top: 10px; */
+    bottom: 10px;
+    right: 10px;
 }
 
 .notification {
@@ -95,9 +93,9 @@ h1 {
     border-radius: 4px;
     box-shadow: 0 0 12px #999;
     color: #fff;
+    -webkit-animation: show-notification 3s ease-out;
     animation: show-notification 3s ease-out;
     margin-bottom: 10px;
-    pointer-events: auto; /* Разрешаем клики на сами уведомления */
 }
 
 .notification-close {
@@ -129,12 +127,6 @@ h1 {
     font-size: 1.1em;
     font-weight: bold;
 }
-
-.notification-message {
-    margin-left: 10px;
-}
-
-/* Иконки уведомлений */
 
 .notification-success::before,
 .notification-error::before,
@@ -182,8 +174,6 @@ h1 {
     content: '\f071';
 }
 
-/* Анимация уведомлений */
-
 @-webkit-keyframes show-notification {
     0% {
         opacity: 0;
@@ -222,7 +212,21 @@ h1 {
     }
 }
 
+
 .notification {
     animation: show-notification 3s ease-out;
     animation-fill-mode: forwards; /* Уведомление остается в последнем состоянии анимации */
+    display: block;
+    position: relative;
+    padding: 15px 15px 15px 60px;
+    overflow: hidden;
+    width: 250px;
+    border-radius: 4px;
+    box-shadow: 0 0 12px #999;
+    color: #fff;
+}
+
+.notification-message{
+    margin-left: 10px;
+    /* margin-right: 15px; */
 }

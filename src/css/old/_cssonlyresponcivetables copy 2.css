@@ -1,0 +1,43 @@
+.rtable {
+  width: 100%; /* Таблица занимает всю ширину */
+  table-layout: fixed; /* Контролируем ширину колонок */
+  border-collapse: collapse;
+}
+
+.rtable th {
+  border: 1px solid #ffffff; /* Границы */
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+  color: aliceblue;
+}
+
+.rtable td {
+  border: 1px solid #000000; /* Границы */
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgb(0, 0, 0);
+}
+
+.rtable .st-code {
+  /* width: 30px;  */
+  width: 5%;
+}
+
+.rtable .st-full {
+  width: 65%;
+  /* width: calc(100% - 30px); */
+}
+
+.rtable .st-grp {
+  width: 15%;
+}
+
+.rtable .st-msr {
+  width: 5%;
+}
+
+.rtable .st-control {
+  width: 5%;
+}

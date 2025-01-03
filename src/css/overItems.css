@@ -1,0 +1,56 @@
+.btn-icon {
+    background: none;
+    border: none;
+    color: azure;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+    color: #000000;
+}
+
+.container {
+    padding: 0;
+}
+
+.table-container {
+    justify-content: center;
+}
+
+.add-group-width {
+    display: flex;
+    margin-bottom: 10px;
+    position: "relative";
+}
+
+.add-group-width input {
+    width: calc(100% - 60px);
+    margin-right: 3px;
+}
+
+.form-control {
+    border-color: #000000;
+}
+
+input.form-control:focus {
+    border-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 5px #212121;
+}
+
+.trable tr:hover {
+    background-color: #c00000; /* Цвет фона при наведении */
+    cursor: pointer; /* Меняем указатель мыши */
+}
+
+.col-actions-center {
+    text-align: center;
+    /* Горизонтальное выравнивание */
+    vertical-align: middle;
+    /* Вертикальное выравнивание */
+}

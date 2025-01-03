@@ -39,23 +39,31 @@
     justify-content: center;
 }
 
-/* CSS-классы для колонок */
+/* CSS-классы для колонок 
 .col-code {
-    width: 65px;
 }
+*/
 
 .rtable .col-code {
+    width: 65px;
     color: white;
 }
 
 .rtable .col-name {
-    width: 100% !important;
+    /* width: 100% !important; */
+    /* width: 100%; */
+    width: auto;
     color: white;
 }
 
 .rtable .col-actions {
     color: white;
     width: 65px;
+}
+
+.rtable .col-meas {
+    color: white;
+    width: 100px;
 }
 
 .col-actions-center {
@@ -88,14 +96,16 @@ input.form-control:focus {
     box-shadow: 0 0 5px #212121;
 }
 
-/* Убираем границу справа для второй колонки */
+/* 
 .rtable td:nth-child(2),
 .rtable th:nth-child(2) {
-  border-right: none; /* Принудительно убираем границу */
+  border-right: none; 
 }
 
-/* Убираем границу слева для третьей колонки */
+
 .rtable td:nth-child(3),
 .rtable th:nth-child(3) {
-  border-left: none; /* Принудительно убираем границу */
+  border-left: none; 
 }
+  */
+
