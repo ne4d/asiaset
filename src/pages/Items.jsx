@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from "prop-types";
 import '../css/materialoutlinedbutton.css';
-// import '../css/cssonlyresponcivetables.css';
-import '../css/cssonlyresponcivetablestest.css';
+import '../css/cssonlyresponcivetables_v2.css';
 import '../css/notifications.css'; // уведомления
 import '../css/overItems.css';
 import '../css/threedotsloading.css'; // загрузка
@@ -138,7 +137,8 @@ function Dropdown({ options, selected, onChange }) {
               height: "25px",
             }}
           >
-            <rect width="24" height="24" fill="white"></rect>
+            {/* <rect width="24" height="24" fill="white"></rect> */}
+            <rect width="24" height="24"></rect>
             <path
               d="M7 17L16.8995 7.10051"
               stroke="#595c5f"
@@ -626,21 +626,21 @@ function Items() {
   }, [notifications, notificationQueue]);
 
   // Пример использования уведомлений
-  const handleSuccess = () => {
-    addNotification("success", "Успех!", "Ваш запрос выполнен успешно.");
-  };
+  // const handleSuccess = () => {
+  //   addNotification("success", "Успех!", "Ваш запрос выполнен успешно.");
+  // };
 
-  const handleError = () => {
-    addNotification("error", "Ошибка!", "Ваш запрос завершился с ошибкой.");
-  };
+  // const handleError = () => {
+  //   addNotification("error", "Ошибка!", "Ваш запрос завершился с ошибкой.");
+  // };
 
-  const handleInfo = () => {
-    addNotification("info", "Информация", "Проверьте новые функции.");
-  };
+  // const handleInfo = () => {
+  //   addNotification("info", "Информация", "Проверьте новые функции.");
+  // };
 
-  const handleWarning = () => {
-    addNotification("warning", "Предупреждение!", "Батарея почти разряжена.");
-  };
+  // const handleWarning = () => {
+  //   addNotification("warning", "Предупреждение!", "Батарея почти разряжена.");
+  // };
 
 
   // блок управления значениями группы
@@ -755,7 +755,8 @@ function Items() {
                   style={{
                     width: "100%",
                     paddingLeft: "40px", // Увеличиваем отступ для текста
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
+                    // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "10px center", // Позиция иконки
                     backgroundSize: "20px 20px", // Размер иконки
@@ -767,8 +768,10 @@ function Items() {
                     onClick={() => setSearchTerm("")} // Очищаем текст при нажатии
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      right: "10px",
+                      // top: "50%",
+                      top: "127px",
+                      // right: "10px",
+                      right: "15px",
                       transform: "translateY(-50%)",
                       background: "transparent",
                       border: "none",
@@ -787,7 +790,8 @@ function Items() {
                         height: "25px",
                       }}
                     >
-                      <rect width="24" height="24" fill="white"></rect>
+                      {/* <rect width="24" height="24" fill="white"></rect> */}
+                      <rect width="24" height="24"></rect>
                       <path
                         d="M7 17L16.8995 7.10051"
                         stroke="#595c5f"
@@ -823,8 +827,10 @@ function Items() {
                     onClick={() => setNewRecordName("")} // Очищаем текст при нажатии
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      right: "55px",
+                      // top: "50%",
+                      top: "175px",
+                      // right: "55px",
+                      right: "65px",
                       transform: "translateY(-50%)",
                       background: "transparent",
                       border: "none",
@@ -842,7 +848,8 @@ function Items() {
                         height: "25px",
                       }}
                     >
-                      <rect width="24" height="24" fill="white"></rect>
+                      {/* <rect width="24" height="24" fill="white"></rect> */}
+                      <rect width="24" height="24"></rect>
                       <path
                         d="M7 17L16.8995 7.10051"
                         stroke="#595c5f"
@@ -877,20 +884,20 @@ function Items() {
               {/* таблица */}
               <table className="rtable">
                 <thead>
-                  <th className="col-code-header" onClick={() => handleSort("id")}>
+                  <th className="col-code3" onClick={() => handleSort("id")}>
                     Код
                     {sortConfig.key === "id" && (
                       <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                     )}
                   </th>
 
-                  <th className="col-long-groups-header" onClick={() => handleSort("name")}>
+                  <th className="col-name3" onClick={() => handleSort("name")}>
                     Имя группы
                     {sortConfig.key === "name" && (
                       <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                     )}
                   </th>
-                  <th className='col-actions'></th>
+                  <th className='col-actions3'></th>
                 </thead>
                 <tbody>
                   {/* Строки с данными */}
@@ -900,8 +907,8 @@ function Items() {
                       onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
                       onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
                     >
-                      <td td className='col-code-body'>{group.id}</td>
-                      <td td className='col-long-groups-body'>
+                      <td td className='col-code3, black, fnt'>{group.id}</td>
+                      <td td className='col-name3, black'>
                         {editRowId === group.id ? (
                           <input
                             type="text"
@@ -916,8 +923,7 @@ function Items() {
                           <span className='fnt'>{group.name}</span>
                         )}
                       </td>
-                      {/* <td className="col-actions-center"> */}
-                      <td className="col-actions">
+                      <td className="col-actions-center">
                         {editRowId === group.id ? (
                           <>
                             {/* Кнопка "Сохранить" */}
@@ -1049,7 +1055,8 @@ function Items() {
                   style={{
                     width: "100%",
                     paddingLeft: "40px", // Увеличиваем отступ для текста
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
+                    // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "10px center", // Позиция иконки
                     backgroundSize: "20px 20px", // Размер иконки
@@ -1061,8 +1068,10 @@ function Items() {
                     onClick={() => setSearchTerm("")} // Очищаем текст при нажатии
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      right: "10px",
+                      // top: "50%",
+                      top: "127px",
+                      // right: "10px",
+                      right: "15px",
                       transform: "translateY(-50%)",
                       background: "transparent",
                       border: "none",
@@ -1081,7 +1090,8 @@ function Items() {
                         height: "25px",
                       }}
                     >
-                      <rect width="24" height="24" fill="white"></rect>
+                      {/* <rect width="24" height="24" fill="white"></rect> */}
+                      <rect width="24" height="24"></rect>
                       <path
                         d="M7 17L16.8995 7.10051"
                         stroke="#595c5f"
@@ -1105,7 +1115,7 @@ function Items() {
                   type="text"
                   value={newRecordName}
                   onChange={(e) => setNewRecordName(e.target.value)}
-                  placeholder="Добавить группу"
+                  placeholder="Добавить товар"
                   className="form-control"
                   style={{
                     width: "100%",
@@ -1117,8 +1127,10 @@ function Items() {
                     onClick={() => setNewRecordName("")} // Очищаем текст при нажатии
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      right: "55px",
+                      // top: "50%",
+                      top: "175px",
+                      // right: "55px",
+                      right: "65px",
                       transform: "translateY(-50%)",
                       background: "transparent",
                       border: "none",
@@ -1136,7 +1148,8 @@ function Items() {
                         height: "25px",
                       }}
                     >
-                      <rect width="24" height="24" fill="white"></rect>
+                      {/* <rect width="24" height="24" fill="white"></rect> */}
+                      <rect width="24" height="24"></rect>
                       <path
                         d="M7 17L16.8995 7.10051"
                         stroke="#595c5f"
