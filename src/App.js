@@ -13,6 +13,7 @@ import Order from './pages/Order';
 import Analitic from './pages/Analitic';
 import Products from './pages/Products';
 import Setting from './pages/Setting';
+import ItemDetails from './pages/ItemDetails';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/salepoint" element={<Salepoint />} />
             <Route path="/storage" element={<Storage />} />
             <Route path="/items" element={<Items />} />
+            <Route path="/item/:id" element={<ItemDetails />} /> {/* Добавлен маршрут */}
             <Route path="/debtbook" element={<Debtbook />} />
             <Route path="/customer" element={<Customer />} />
             <Route path="/worker" element={<Worker />} />

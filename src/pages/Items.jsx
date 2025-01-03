@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from "prop-types";
 import '../css/materialoutlinedbutton.css';
 import '../css/cssonlyresponcivetables_v2.css';
@@ -1234,7 +1235,9 @@ function Items() {
                             }}
                           />
                         ) : (
-                          <span className='fnt'>{group.name}</span>
+                          <Link to={`/item/${group.id}`} className="item-link">
+                            <span className='fnt'>{group.name}</span>
+                          </Link>
                         )}
                       </td>
                       {/* v2 */}
