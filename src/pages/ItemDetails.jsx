@@ -7,25 +7,20 @@ function ItemDetails() {
   const [loading, setLoading] = useState(true); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
 
-  // Поля для редактирования
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState(null);
+  const MAX_FILE_SIZE_MB = 10; // Максимальный размер файла в MB
 
   useEffect(() => {
-    // Загрузка данных о товаре
     const fetchItemDetails = async () => {
       try {
         const response = await fetch(`/api/nomenklatura/details/${id}`);
-        if (response.status === 404) {
-          // Если данные отсутствуют, создаем пустой объект для редактирования
-          setItem(null);
-        } else if (!response.ok) {
+        if (!response.ok) {
           throw new Error('Ошибка загрузки данных');
-        } else {
-          const data = await response.json();
-          setItem(data);
-          setDescription(data.description || ''); // Устанавливаем описание
         }
+        const data = await response.json();
+        setItem(data);
+        setDescription(data.description || '');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -35,6 +30,19 @@ function ItemDetails() {
 
     fetchItemDetails();
   }, [id]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileSizeMB = file.size / (1024 * 1024);
+      if (fileSizeMB > MAX_FILE_SIZE_MB) {
+        alert(`Размер файла не должен превышать ${MAX_FILE_SIZE_MB} MB.`);
+        e.target.value = null;
+        return;
+      }
+      setImageFile(file);
+    }
+  };
 
   const handleSave = async () => {
     const formData = new FormData();
@@ -54,10 +62,10 @@ function ItemDetails() {
       }
 
       const data = await response.json();
-      setItem(data); // Обновляем данные после сохранения
+      setItem(data);
       alert('Данные успешно сохранены!');
     } catch (err) {
-      alert('Ошибка при сохранении данных: ' + err.message);
+      alert(`Ошибка при сохранении данных: ${err.message}`);
     }
   };
 
@@ -70,8 +78,7 @@ function ItemDetails() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', margin: '20px' }}>
-      {/* Бокс для изображения */}
+    <div style={{ display: 'flex', gap: '20px', margin: '20px' }}>
       <div style={{ width: '50%', textAlign: 'center' }}>
         <h3>Изображение</h3>
         {item?.image_url ? (
@@ -81,25 +88,15 @@ function ItemDetails() {
             style={{ maxWidth: '100%', maxHeight: '300px', border: '1px solid #ccc' }}
           />
         ) : (
-          <>
-            <p>Добавьте изображение</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files[0])}
-              style={{ marginTop: '10px' }}
-            />
-          </>
+          <p>Добавьте изображение</p>
         )}
+        <input type="file" accept="image/*" onChange={handleFileChange} />
       </div>
-
-      {/* Поле для описания */}
       <div style={{ width: '50%' }}>
         <h3>Описание</h3>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Введите описание товара"
           style={{
             width: '100%',
             height: '200px',
@@ -107,6 +104,7 @@ function ItemDetails() {
             border: '1px solid #ccc',
             borderRadius: '4px',
           }}
+          placeholder="Введите описание товара"
         />
         <button
           onClick={handleSave}
