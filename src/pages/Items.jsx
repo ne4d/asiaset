@@ -1235,7 +1235,15 @@ function Items() {
                             }}
                           />
                         ) : (
-                          <Link to={`/item/${group.id}`} className="item-link">
+                          // <Link to={`/item/${group.id}`} className="item-link">
+                          <Link to={`/item/${group.id}`}
+                            style={{
+                              // background: "red",
+                              cursor: "pointer",
+                              fontSize: "20px",
+                              color: "black",
+                              textDecorationLine: "none",
+                            }}>
                             <span className='fnt'>{group.name}</span>
                           </Link>
                         )}

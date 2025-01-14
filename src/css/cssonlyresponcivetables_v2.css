@@ -58,15 +58,15 @@ table {
 /* стили колонок */
 /* 5 колонок */
 .rtable .col-code5 {
-  width: 5%;
+  width: 3%;
 }
 .rtable .col-code5 .black {
-  width: 5%;
+  width: 3%;
   color: black;
 }
 
 .rtable .col-name5 {
-  width: 70%;
+  width: 72%;
 }
 
 .rtable .col-name5 .black{
@@ -93,21 +93,21 @@ table {
   height: 10px;
 }
 
-/* .rtable .fnt {
+.rtable .fnt {
   font-size: 16px;
-} */
+}
 
 /* 3 колонок v2*/
 .rtable .col-code3 {
-  width: 5%;
+  width: 3%;
 }
 .rtable .col-code3 .black {
-  width: 5%;
+  width: 3%;
   color: black;
 }
 
 .rtable .col-name3 {
-  width: 92%; 
+  width: 96%; 
   /* нужно больше почемуто чем сумма 5+5 */
 }
 

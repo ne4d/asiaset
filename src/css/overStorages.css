@@ -1,0 +1,32 @@
+/* 4 колонок*/
+.rtable .col-storage-code4 {
+    width: 3%;
+  }
+  .rtable .col-storage-code4 .black {
+    width: 3%;
+    color: black;
+  }
+  
+  .rtable .col-storage-name4 {
+    width: 64%; 
+    /* нужно больше почемуто чем сумма 5+5 */
+  }
+  
+  .rtable .col-storage-name4 .black{
+    color: black;
+    height: 30px;
+  }
+  
+  .rtable .col-storage-address4 {
+    width: 32%; 
+    /* нужно больше почемуто чем сумма 5+5 */
+  }
+  
+  .rtable .col-storage-address4 .black{
+    color: black;
+    height: 30px;
+  }
+  
+  .rtable .col-storage-actions4 {
+    width: 5%;
+  }
