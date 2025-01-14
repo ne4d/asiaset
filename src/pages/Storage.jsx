@@ -178,7 +178,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
         alignItems: "center",
         zIndex: 1000,
       }}
-      >
+    >
       <div
         style={{
           backgroundColor: "white",
@@ -362,70 +362,36 @@ function Items() {
 
   // блок сохранения редактируемой записи
   const handleSaveClick = async (id) => {
-    if (isTableGroupVisible) {
-      try {
-        // Получаем текущую группу из состояния
-        const currentGroup = groups.find((group) => group.id === id);
+    try {
+      // Получаем текущую группу из состояния
+      const currentGroup = groups.find((group) => group.id === id);
 
-        // Проверяем, изменилось ли значение
-        if (currentGroup.name === editValue && currentGroup.address == editAddress) {
-          addNotification("info", "", "Изменений не найдено.");
-          setEditRowId(null);
-          setEditValue("");
-          return; // Выходим из функции, чтобы не отправлять запрос
-        }
+      // Проверяем, изменилось ли значение
+      if (currentGroup.name === editValue && currentGroup.address == editAddress) {
+        addNotification("info", "", "Изменений не найдено.");
+        setEditRowId(null);
+        setEditValue("");
+        return; // Выходим из функции, чтобы не отправлять запрос
+      }
 
+      if (isTableGroupVisible) {
         const response = await fetch(`/api/storages/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: editValue,
+          body: JSON.stringify({
+            name: editValue,
             address: editAddress
-           }),
+          }),
         });
-
+        
         if (!response.ok) {
           throw new Error(`Ошибка при обновлении: ${response.statusText}`);
         }
-
         const data = await response.json();
-        setGroups((prevGroups) =>
-          prevGroups.map((group) =>
-            group.id === id ? { ...group, name: editValue, address: editAddress} : group
-          )
-        );
-        addNotification("success", "", "Склад успешн обновлен.");
-        setEditRowId(null);
-        setEditValue("");
-      } catch (error) {
-        console.error("Ошибка сохранения:", error);
-        addNotification("error", "", "Не удалось обновить запись. Попробуйте ещё раз.");
-      }
-    } else if (isTableProductVisible) {
-
-      // v4
-      try {
-        const currentGroup = groups.find((group) => group.id === id);
-
-        // Устанавливаем значения по умолчанию, если они не указаны
-        const updatedMeasurement = editMeasurementValue.trim() || currentGroup.measurement;
-        const updatedGroup = selectedGroup; // Значение может быть null
-
-        // Проверяем, изменились ли данные
-        if (
-          currentGroup.name === editValue &&
-          currentGroup.measurement === updatedMeasurement &&
-          currentGroup.group === updatedGroup
-        ) {
-          addNotification("info", "", "Изменений не найдено.");
-          setEditRowId(null);
-          setEditValue("");
-          setEditMeasurementValue("");
-          setSelectedGroup("");
-          return;
-        }
-
+      } else if (isTableProductVisible) {
+        
         // Отправляем запрос на сервер
         const response = await fetch(`/api/salespoint/${id}`, {
           method: "PUT",
@@ -434,8 +400,7 @@ function Items() {
           },
           body: JSON.stringify({
             name: editValue,
-            measurement: updatedMeasurement,
-            group: updatedGroup, // Может быть null
+            address: editAddress
           }),
         });
 
@@ -443,25 +408,23 @@ function Items() {
           throw new Error(`Ошибка при обновлении: ${response.statusText}`);
         }
 
-        // Обновляем локальное состояние
-        setGroups((prevGroups) =>
-          prevGroups.map((group) =>
-            group.id === id
-              ? { ...group, name: editValue, measurement: updatedMeasurement, group: updatedGroup }
-              : group
-          )
-        );
-
-        // Показываем уведомление и сбрасываем состояние редактирования
-        addNotification("success", "", "Товар успешно обновлен.");
-        setEditRowId(null);
-        setEditValue("");
-        setEditMeasurementValue("");
-        setSelectedGroup("");
-      } catch (error) {
-        console.error("Ошибка сохранения:", error);
-        addNotification("error", "", "Не удалось обновить запись. Попробуйте ещё раз.");
+        const data = await response.json();
       }
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          group.id === id ? { ...group, name: editValue, address: editAddress } : group
+        )
+      );
+      if (isTableGroupVisible) {
+        addNotification("success", "", "Склад успешн обновлен.");
+      } else if (isTableProductVisible) {
+        addNotification("success", "", "Точка продаж успешно обновлена.");
+      }
+      setEditRowId(null);
+      setEditValue("");
+    } catch (error) {
+      console.error("Ошибка сохранения:", error);
+      addNotification("error", "", "Не удалось обновить запись. Попробуйте ещё раз.");
     }
   };
 
@@ -1220,20 +1183,14 @@ function Items() {
                       )}
                     </th>
                     <th className="col-name5" onClick={() => handleSort("name")}>
-                      Имя товара
+                      Имя точки продаж
                       {sortConfig.key === "name" && (
                         <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                       )}
                     </th>
                     <th className="col-grp5" onClick={() => handleSort("group")}>
-                      Группа
-                      {sortConfig.key === "group" && (
-                        <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
-                      )}
-                    </th>
-                    <th className="col-meas5" onClick={() => handleSort("measurement")}>
-                      Ед.
-                      {sortConfig.key === "measurement" && (
+                      Адрес точки продаж
+                      {sortConfig.key === "address" && (
                         <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                       )}
                     </th>
@@ -1248,8 +1205,8 @@ function Items() {
                       onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
                       onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
                     >
-                      <td className='col-code, black, fnt'>{group.id}</td>
-                      <td className='col-name, black'>
+                      <td td className='col-storage-code4, black, fnt'>{group.id}</td>
+                      <td td className='col-storage-name4, black'>
                         {editRowId === group.id ? (
                           <input
                             type="text"
@@ -1257,55 +1214,26 @@ function Items() {
                             onChange={(e) => setEditValue(e.target.value)}
                             className="form-control"
                             style={{
-                              // paddingTop: 0,
                               height: 28
                             }}
                           />
                         ) : (
-                          // <Link to={`/item/${group.id}`} className="item-link">
-                          <Link to={`/item/${group.id}`}
-                            style={{
-                              // background: "red",
-                              cursor: "pointer",
-                              fontSize: "20px",
-                              color: "black",
-                              textDecorationLine: "none",
-                            }}>
-                            <span className='fnt'>{group.name}</span>
-                          </Link>
+                          <span className='fnt'>{group.name}</span>
                         )}
                       </td>
-                      {/* v2 */}
-                      <td>
+                      <td td className='col-storage-address4, black'>
                         {editRowId === group.id ? (
-                          <Dropdown
-                            options={groupOptions} // Список строк
-                            selected={selectedGroup} // Текущее значение
-                            onChange={(value) => setSelectedGroup(value)} // Устанавливаем строку в состояние
+                          <input
+                            type="text"
+                            value={editAddress}
+                            onChange={(e) => setAddressValue(e.target.value)}
+                            className="form-control"
+                            style={{
+                              height: 28
+                            }}
                           />
                         ) : (
-                          <span>{group.group}</span>
-                        )}
-                      </td>
-
-                      {/* <td style={{ borderRight: "none" }}> */}
-                      <td className='black'>
-                        {editRowId === group.id ? (
-                          <select
-                            value={editMeasurementValue} // Связываем с состоянием
-                            onChange={(e) => setEditMeasurementValue(e.target.value)}
-                            className="form-select"
-                            style={{
-                              paddingTop: 0,
-                              height: 28,
-                            }}
-                          >
-                            <option value="шт">шт</option>
-                            <option value="кор">кор</option>
-                            <option value="упк">упк</option>
-                          </select>
-                        ) : (
-                          <span>{group.measurement}</span>
+                          <span className='fnt'>{group.address}</span>
                         )}
                       </td>
                       <td className="col-actions-center">
@@ -1390,7 +1318,7 @@ function Items() {
                           <>
                             <button
                               className="btn-icon btn-danger"
-                              onClick={() => handleEditClick(group.id, group.name, group.measurement, group.group)}
+                              onClick={() => handleEditClick(group.id, group.name, group.address)}
                             >
                               <svg
                                 width="25px"
