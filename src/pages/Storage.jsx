@@ -336,19 +336,22 @@ function Items() {
 
   const [editRowId, setEditRowId] = useState(null); // ID строки, которая редактируется
   const [editValue, setEditValue] = useState(""); // Значение для редактирования
+  const [editAddress, setAddressValue] = useState(""); // Значение для редактирования
   const [hoverRowId, setHoverRowId] = useState(null); // ID строки, на которую наведена мышь
 
   const [editMeasurementValue, setEditMeasurementValue] = useState("");
   const [editGroupValue, setEditGroupValue] = useState("");
 
   // const handleEditClick = (id, currentValue) => {
-  const handleEditClick = (id, currentValue, currentMeasurement, currentGroup) => {
+  // const handleEditClick = (id, currentValue, currentMeasurement, currentGroup) => {
+  const handleEditClick = (id, currentValue, currentAddress) => {
     setEditRowId(id); // Устанавливаем редактируемую строку
     setEditValue(currentValue); // Подставляем текущее значение
-    if (isTableProductVisible) {
-      setEditMeasurementValue(currentMeasurement); // Устанавливаем текущее значение измерения
-      setSelectedGroup(currentGroup); // Устанавливаем текущее значение группы
-    }
+    setAddressValue(currentAddress);
+    // if (isTableProductVisible) {
+    //   setEditMeasurementValue(currentMeasurement); // Устанавливаем текущее значение измерения
+    //   setSelectedGroup(currentGroup); // Устанавливаем текущее значение группы
+    // }
   };
 
   // функция удаления текста в поле поиска
@@ -365,7 +368,7 @@ function Items() {
         const currentGroup = groups.find((group) => group.id === id);
 
         // Проверяем, изменилось ли значение
-        if (currentGroup.name === editValue) {
+        if (currentGroup.name === editValue && currentGroup.address == editAddress) {
           addNotification("info", "", "Изменений не найдено.");
           setEditRowId(null);
           setEditValue("");
@@ -377,7 +380,9 @@ function Items() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: editValue }),
+          body: JSON.stringify({ name: editValue,
+            address: editAddress
+           }),
         });
 
         if (!response.ok) {
@@ -387,10 +392,10 @@ function Items() {
         const data = await response.json();
         setGroups((prevGroups) =>
           prevGroups.map((group) =>
-            group.id === id ? { ...group, name: editValue } : group
+            group.id === id ? { ...group, name: editValue, address: editAddress} : group
           )
         );
-        addNotification("success", "", "Группа успешно обновлена.");
+        addNotification("success", "", "Склад успешн обновлен.");
         setEditRowId(null);
         setEditValue("");
       } catch (error) {
@@ -935,8 +940,8 @@ function Items() {
                         {editRowId === group.id ? (
                           <input
                             type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            value={editAddress}
+                            onChange={(e) => setAddressValue(e.target.value)}
                             className="form-control"
                             style={{
                               height: 28
@@ -1028,7 +1033,7 @@ function Items() {
                           <>
                             <button
                               className="btn-icon btn-danger"
-                              onClick={() => handleEditClick(group.id, group.name)}
+                              onClick={() => handleEditClick(group.id, group.name, group.address)}
                             >
                               <svg
                                 width="25px"
