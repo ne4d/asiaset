@@ -263,7 +263,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
 }
 
 // основная функция
-function Items() {
+function Storage() {
   const [groups, setGroups] = useState([]); // Состояние для хранения данных
   const [loading, setLoading] = useState(false); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
@@ -326,12 +326,14 @@ function Items() {
     fetchGroups();
     toggleTableVisibility(true);
     toggleProductVisibility(false);
+    setEditRowId(null);
   };
   // Обработчик кнопки "Группы"
   const handleLoadProducts = () => {
     fetchNomenklatura();
     toggleTableVisibility(false);
     toggleProductVisibility(true);
+    setEditRowId(null);
   };
 
   const [editRowId, setEditRowId] = useState(null); // ID строки, которая редактируется
@@ -339,8 +341,11 @@ function Items() {
   const [editAddress, setAddressValue] = useState(""); // Значение для редактирования
   const [hoverRowId, setHoverRowId] = useState(null); // ID строки, на которую наведена мышь
 
+  const [newRecordAddress, setNewRecordAddress] = useState("");
+
+
   const [editMeasurementValue, setEditMeasurementValue] = useState("");
-  const [editGroupValue, setEditGroupValue] = useState("");
+  // const [editGroupValue, setEditGroupValue] = useState("");
 
   // const handleEditClick = (id, currentValue) => {
   // const handleEditClick = (id, currentValue, currentMeasurement, currentGroup) => {
@@ -385,13 +390,13 @@ function Items() {
             address: editAddress
           }),
         });
-        
+
         if (!response.ok) {
           throw new Error(`Ошибка при обновлении: ${response.statusText}`);
         }
         const data = await response.json();
       } else if (isTableProductVisible) {
-        
+
         // Отправляем запрос на сервер
         const response = await fetch(`/api/salespoint/${id}`, {
           method: "PUT",
@@ -436,116 +441,221 @@ function Items() {
     setIsModalOpen(true); // Открываем модальное окно
   };
 
+  // const confirmDelete = async () => {
+  //   const id = rowToDelete.id;
+  //   try {
+  //     const url = isTableGroupVisible
+  //       ? `/api/storages/${id}`
+  //       : `/api/salespoint/${id}`;
+  //     const response = await fetch(url, { method: "DELETE" });
+
+  //     if (!response.ok) {
+  //       throw new Error(`Ошибка при удалении: ${response.statusText}`);
+  //     }
+
+  //     setGroups((prevGroups) => prevGroups.filter((group) => group.id !== id));
+  //     addNotification("success", "", "Запись успешно удалена.");
+  //   } catch (error) {
+  //     console.error("Ошибка удаления:", error);
+  //     addNotification("error", "", "Не удалось удалить запись. Попробуйте ещё раз.");
+  //   } finally {
+  //     setIsModalOpen(false); // Закрываем окно
+  //   }
+  // };
+
+  // v2
   const confirmDelete = async () => {
     const id = rowToDelete.id;
     try {
-      const url = isTableGroupVisible
-        ? `/api/storages/${id}`
-        : `/api/salespoint/${id}`;
-      const response = await fetch(url, { method: "DELETE" });
-
+      const response = await fetch(`/api/locations/${id}`, { method: 'DELETE' });
       if (!response.ok) {
-        throw new Error(`Ошибка при удалении: ${response.statusText}`);
+        throw new Error('Ошибка при удалении');
       }
-
-      setGroups((prevGroups) => prevGroups.filter((group) => group.id !== id));
-      addNotification("success", "", "Запись успешно удалена.");
-    } catch (error) {
-      console.error("Ошибка удаления:", error);
-      addNotification("error", "", "Не удалось удалить запись. Попробуйте ещё раз.");
+      setGroups((prev) => prev.filter((group) => group.id !== id));
+      addNotification("success", "", "Запись успешно удалена");
+    } catch (err) {
+      addNotification("error", "", "Не удалось удалить запись.");
     } finally {
-      setIsModalOpen(false); // Закрываем окно
+      setIsModalOpen(false);
     }
   };
+
 
   // блок создания новой записи
   const [newRecordName, setNewRecordName] = useState(""); // Состояние для новой записи
 
+  const fetchLocations = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/locations');
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки данных');
+      }
+      const data = await response.json();
+      setGroups(data); // Сохраняем данные в состоянии
+    } catch (err) {
+      setError(err.message);
+      addNotification("error", "", "База данных недоступна");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // const handleAddClick = async () => {
+  //   if (isTableGroupVisible) {
+  //     if (!newRecordName.trim()) {
+  //       addNotification("error", "", "Название группы не может быть пустым");
+  //       return;
+  //     }
+
+  //     try {
+  //       const response = await fetch("/api/storages", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ name: newRecordName, address: newRecordAddress }),
+  //       });
+
+  //       if (!response.ok) {
+  //         if (response.status === 409) { // Например, если группа уже существует
+  //           addNotification("warning", "", "Такая группа уже существует.");
+  //         } else {
+  //           throw new Error("Ошибка добавления записи");
+  //         }
+  //       } else {
+  //         const data = await response.json();
+  //         setGroups((prevGroups) => [...prevGroups, { id: data.id, name: newRecordName }]);
+  //         addNotification("success", "", "Группа успешно добавлена.");
+  //         setNewRecordName(""); // Очистить поле ввода
+  //       }
+  //     } catch (err) {
+  //       console.error("Ошибка при добавлении записи:", err);
+  //       addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
+  //     }
+
+  //     // v2
+  //     // } else if (isTableProductVisible) {
+  //     //   // Проверяем, что имя товара не пустое
+  //     //   if (!newRecordName.trim()) {
+  //     //     addNotification("error", "", "Название товара не может быть пустым");
+  //     //     return;
+  //     //   }
+
+  //     //   // Устанавливаем значение измерения по умолчанию, если оно не задано
+  //     //   const measurementValue = editMeasurementValue.trim() || "шт";
+
+  //     //   try {
+  //     //     const response = await fetch("/api/salespoint", {
+  //     //       method: "POST",
+  //     //       headers: {
+  //     //         "Content-Type": "application/json",
+  //     //       },
+  //     //       body: JSON.stringify({
+  //     //         name: newRecordName,
+  //     //         // measurement: measurementValue
+  //     //         address: newRecordAddress
+  //     //       }),
+  //     //     });
+
+  //     //     if (!response.ok) {
+  //     //       if (response.status === 409) {
+  //     //         addNotification("warning", "", "Такая номенклатура уже существует.");
+  //     //       } else {
+  //     //         throw new Error("Ошибка добавления записи");
+  //     //       }
+  //     //       return; // Прекращаем выполнение в случае ошибки
+  //     //     }
+
+  //     //     const data = await response.json();
+
+  //     //     if (data && data.id) {
+  //     //       setGroups((prevGroups) => [
+  //     //         ...prevGroups,
+  //     //         { id: data.id, name: newRecordName, measurement: measurementValue },
+  //     //       ]);
+  //     //       addNotification("success", "", "Товар успешно добавлен.");
+  //     //       setNewRecordName(""); // Очистить поле ввода
+  //     //       setEditMeasurementValue(""); // Сбросить измерение
+  //     //     } else {
+  //     //       throw new Error("Неверный ответ от сервера");
+  //     //     }
+  //     //   } catch (err) {
+  //     //     console.error("Ошибка при добавлении записи:", err);
+  //     //     addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
+  //     //   }
+  //     // }
+
+  //     // v3
+  //     if (isTableProductVisible) {
+  //       if (!newRecordName.trim()) {
+  //         addNotification("error", "", "Название группы не может быть пустым");
+  //         return;
+  //       }
+
+  //       try {
+  //         const response = await fetch("/api/storages", {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({ name: newRecordName, address: newRecordAddress }),
+  //         });
+
+  //         if (!response.ok) {
+  //           if (response.status === 409) { // Например, если группа уже существует
+  //             addNotification("warning", "", "Такая группа уже существует.");
+  //           } else {
+  //             throw new Error("Ошибка добавления записи");
+  //           }
+  //         } else {
+  //           const data = await response.json();
+  //           setGroups((prevGroups) => [...prevGroups, { id: data.id, name: newRecordName }]);
+  //           addNotification("success", "", "Группа успешно добавлена.");
+  //           setNewRecordName(""); // Очистить поле ввода
+  //         }
+  //       } catch (err) {
+  //         console.error("Ошибка при добавлении записи:", err);
+  //         addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
+  //       }
+
+  //     }
+  //   }
+
+  // v4
   const handleAddClick = async () => {
-    if (isTableGroupVisible) {
-      if (!newRecordName.trim()) {
-        addNotification("error", "", "Название группы не может быть пустым");
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/storages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: newRecordName }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 409) { // Например, если группа уже существует
-            addNotification("warning", "", "Такая группа уже существует.");
-          } else {
-            throw new Error("Ошибка добавления записи");
-          }
-        } else {
-          const data = await response.json();
-          setGroups((prevGroups) => [...prevGroups, { id: data.id, name: newRecordName }]);
-          addNotification("success", "", "Группа успешно добавлена.");
-          setNewRecordName(""); // Очистить поле ввода
-        }
-      } catch (err) {
-        console.error("Ошибка при добавлении записи:", err);
-        addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
-      }
-
-      // v2
-    } else if (isTableProductVisible) {
-      // Проверяем, что имя товара не пустое
-      if (!newRecordName.trim()) {
-        addNotification("error", "", "Название товара не может быть пустым");
-        return;
-      }
-
-      // Устанавливаем значение измерения по умолчанию, если оно не задано
-      const measurementValue = editMeasurementValue.trim() || "шт";
-
-      try {
-        const response = await fetch("/api/salespoint", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: newRecordName,
-            measurement: measurementValue
-          }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 409) {
-            addNotification("warning", "", "Такая номенклатура уже существует.");
-          } else {
-            throw new Error("Ошибка добавления записи");
-          }
-          return; // Прекращаем выполнение в случае ошибки
-        }
-
-        const data = await response.json();
-
-        if (data && data.id) {
-          setGroups((prevGroups) => [
-            ...prevGroups,
-            { id: data.id, name: newRecordName, measurement: measurementValue },
-          ]);
-          addNotification("success", "", "Товар успешно добавлен.");
-          setNewRecordName(""); // Очистить поле ввода
-          setEditMeasurementValue(""); // Сбросить измерение
-        } else {
-          throw new Error("Неверный ответ от сервера");
-        }
-      } catch (err) {
-        console.error("Ошибка при добавлении записи:", err);
-        addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
-      }
+    if (!newRecordName.trim() || !newRecordAddress.trim()) {
+      addNotification("error", "", "Имя и адрес не могут быть пустыми");
+      return;
     }
 
+    try {
+      const response = await fetch('/api/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newRecordName,
+          address: newRecordAddress,
+          type: isTableGroupVisible ? 'storage' : 'salespoint',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка добавления записи');
+      }
+
+      const data = await response.json();
+      setGroups((prev) => [...prev, { id: data.id, name: newRecordName, address: newRecordAddress, type: isTableGroupVisible ? 'storage' : 'salespoint' }]);
+      addNotification("success", "", "Запись успешно добавлена");
+      setNewRecordName('');
+      setNewRecordAddress('');
+    } catch (err) {
+      addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
+    }
   };
+
 
   const [searchTerm, setSearchTerm] = useState("");
   const filteredGroups = groups.filter((group) =>
@@ -873,6 +983,12 @@ function Items() {
                       <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                     )}
                   </th>
+                  <th className="col-storage-type4" onClick={() => handleSort("type")}>
+                    Тип
+                    {sortConfig.key === "type" && (
+                      <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
+                    )}
+                  </th>
                   <th className='col-storage-actions4'></th>
                 </thead>
                 <tbody>
@@ -883,8 +999,8 @@ function Items() {
                       onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
                       onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
                     >
-                      <td td className='col-storage-code4, black, fnt'>{group.id}</td>
-                      <td td className='col-storage-name4, black'>
+                      <td className="col-storage-code4 black fnt">{group.id}</td>
+                      <td className="col-storage-name4 black">
                         {editRowId === group.id ? (
                           <input
                             type="text"
@@ -892,14 +1008,16 @@ function Items() {
                             onChange={(e) => setEditValue(e.target.value)}
                             className="form-control"
                             style={{
-                              height: 28
+                              height: 28,
                             }}
                           />
                         ) : (
-                          <span className='fnt'>{group.name}</span>
+                          <Link to={`/storages/${group.id}`} className="item-link">
+                            {group.name}
+                          </Link>
                         )}
                       </td>
-                      <td td className='col-storage-address4, black'>
+                      <td className="col-storage-address4 black">
                         {editRowId === group.id ? (
                           <input
                             type="text"
@@ -907,12 +1025,15 @@ function Items() {
                             onChange={(e) => setAddressValue(e.target.value)}
                             className="form-control"
                             style={{
-                              height: 28
+                              height: 28,
                             }}
                           />
                         ) : (
-                          <span className='fnt'>{group.address}</span>
+                          <span className="fnt">{group.address}</span>
                         )}
+                      </td>
+                      <td className="col-storage-type4 black">
+                        {group.type === "storage" ? "Склад" : "Точка продаж"}
                       </td>
                       <td className="col-actions-center">
                         {editRowId === group.id ? (
@@ -1041,7 +1162,7 @@ function Items() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Поиск по имени товара"
+                  placeholder="Поиск по имени точки продаж"
                   className="form-control"
                   style={{
                     width: "100%",
@@ -1106,7 +1227,7 @@ function Items() {
                   type="text"
                   value={newRecordName}
                   onChange={(e) => setNewRecordName(e.target.value)}
-                  placeholder="Добавить товар"
+                  placeholder="Добавить точку продаж"
                   className="form-control"
                   style={{
                     width: "100%",
@@ -1176,25 +1297,25 @@ function Items() {
               <table className="rtable">
                 <thead>
                   <tr>
-                    <th className="col-code5" onClick={() => handleSort("id")}>
+                    <th className="col-storage-code4" onClick={() => handleSort("id")}>
                       Код
                       {sortConfig.key === "id" && (
                         <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                       )}
                     </th>
-                    <th className="col-name5" onClick={() => handleSort("name")}>
+                    <th className="col-storage-name4" onClick={() => handleSort("name")}>
                       Имя точки продаж
                       {sortConfig.key === "name" && (
                         <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                       )}
                     </th>
-                    <th className="col-grp5" onClick={() => handleSort("group")}>
+                    <th className="col-storage-address4" onClick={() => handleSort("group")}>
                       Адрес точки продаж
                       {sortConfig.key === "address" && (
                         <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
                       )}
                     </th>
-                    <th className='col-actions5'></th>
+                    <th className='col-storage-actions4'></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1218,7 +1339,11 @@ function Items() {
                             }}
                           />
                         ) : (
-                          <span className='fnt'>{group.name}</span>
+                          // <span className='fnt'>{group.name}</span>
+                          <Link to={`/salespoints/${group.id}`} className="item-link">
+                            {group.name}
+                          </Link>
+
                         )}
                       </td>
                       <td td className='col-storage-address4, black'>
@@ -1351,4 +1476,4 @@ function Items() {
   );
 }
 
-export default Items;
+export default Storage;

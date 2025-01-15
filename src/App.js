@@ -14,6 +14,7 @@ import Analitic from './pages/Analitic';
 import Products from './pages/Products';
 import Setting from './pages/Setting';
 import ItemDetails from './pages/ItemDetails';
+import StorageDetails from './pages/StorageDetails';
 
 function App() {
   return (
@@ -44,6 +45,8 @@ function App() {
             <Route path="/0" element={<Products />} />
             <Route path="/0" element={<Products />} />
             <Route path="/setting" element={<Setting />} />
+            <Route path="/storages/:id" element={<StorageDetails />} />
+            <Route path="/salespoints/:id" element={<StorageDetails />} />
           </Routes>
         </div>
       </div>
