@@ -324,12 +324,14 @@ function Items() {
     fetchGroups();
     toggleTableVisibility(true);
     toggleProductVisibility(false);
+    setEditRowId(null);
   };
   // Обработчик кнопки "Группы"
   const handleLoadProducts = () => {
     fetchNomenklatura();
     toggleTableVisibility(false);
     toggleProductVisibility(true);
+    setEditRowId(null);
   };
 
   const [editRowId, setEditRowId] = useState(null); // ID строки, которая редактируется

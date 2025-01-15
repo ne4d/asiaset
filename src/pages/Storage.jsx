@@ -350,12 +350,16 @@ function Items() {
     fetchGroups();
     toggleTableVisibility(true);
     toggleProductVisibility(false);
+    setEditRowId(null);
+    setSearchTerm("");
   };
   // Обработчик кнопки "Группы"
   const handleLoadProducts = () => {
     fetchNomenklatura();
     toggleTableVisibility(false);
     toggleProductVisibility(true);
+    setEditRowId(null);
+    setSearchTerm("");
   };
 
   const [editRowId, setEditRowId] = useState(null); // ID строки, которая редактируется
@@ -479,16 +483,22 @@ function Items() {
       addNotification("error", "", "Не удалось удалить запись. Попробуйте ещё раз.");
     } finally {
       setIsModalOpen(false); // Закрываем окно
+      isTableGroupVisible ? handleLoadGroups() : handleLoadProducts();
     }
   };
 
   // блок создания новой записи
   const [newRecordName, setNewRecordName] = useState(""); // Состояние для новой записи
 
+  // const addAndUpdate = (value) => {
+  //   setNewRecordName(value); // Отменяем редактирование
+  //   isTableGroupVisible ? handleLoadGroups() : handleLoadProducts();
+  // };
+
   const handleAddClick = async () => {
     if (isTableGroupVisible) {
       if (!newRecordName.trim()) {
-        addNotification("error", "", "Название группы не может быть пустым");
+        addNotification("error", "", "Название склада не может быть пустым");
         return;
       }
 
@@ -503,15 +513,16 @@ function Items() {
 
         if (!response.ok) {
           if (response.status === 409) { // Например, если группа уже существует
-            addNotification("warning", "", "Такая группа уже существует.");
+            addNotification("warning", "", "Такой склад уже существует.");
           } else {
             throw new Error("Ошибка добавления записи");
           }
         } else {
           const data = await response.json();
           setGroups((prevGroups) => [...prevGroups, { id: data.id, name: newRecordName }]);
-          addNotification("success", "", "Группа успешно добавлена.");
+          addNotification("success", "", "Склад успешно добавлен.");
           setNewRecordName(""); // Очистить поле ввода
+          handleLoadGroups();
         }
       } catch (err) {
         console.error("Ошибка при добавлении записи:", err);
@@ -522,7 +533,7 @@ function Items() {
     } else if (isTableProductVisible) {
       // Проверяем, что имя товара не пустое
       if (!newRecordName.trim()) {
-        addNotification("error", "", "Название товара не может быть пустым");
+        addNotification("error", "", "Название точки продаж не может быть пустым");
         return;
       }
 
@@ -543,7 +554,7 @@ function Items() {
 
         if (!response.ok) {
           if (response.status === 409) {
-            addNotification("warning", "", "Такая номенклатура уже существует.");
+            addNotification("warning", "", "Такая точка продаж уже существует.");
           } else {
             throw new Error("Ошибка добавления записи");
           }
@@ -557,9 +568,10 @@ function Items() {
             ...prevGroups,
             { id: data.id, name: newRecordName, measurement: measurementValue },
           ]);
-          addNotification("success", "", "Товар успешно добавлен.");
+          addNotification("success", "", "Точка продаж успешно добавлена.");
           setNewRecordName(""); // Очистить поле ввода
           setEditMeasurementValue(""); // Сбросить измерение
+          handleLoadProducts();
         } else {
           throw new Error("Неверный ответ от сервера");
         }
@@ -810,6 +822,7 @@ function Items() {
                   type="text"
                   value={newRecordName}
                   onChange={(e) => setNewRecordName(e.target.value)}
+                  // onChange={(e) => addAndUpdate(e.target.value)}
                   placeholder="Добавить склад"
                   className="form-control"
                   style={{
@@ -877,6 +890,9 @@ function Items() {
 
               </div>
               {/* таблица */}
+              {!isTableNotEmpty ? (
+                    <center><p>Данных пока нет</p></center>
+                  ) : (
               <table className="rtable">
                 <thead>
                   <th className="col-storage-code4" onClick={() => handleSort("id")}>
@@ -901,11 +917,7 @@ function Items() {
                 </thead>
                 <tbody>
                   {/* Строки с данными */}
-                  {!isTableNotEmpty ? (
-                    <tr><td></td><td>Данных нет</td><td></td><td></td></tr>
-                    // <center><p>Данных нет</p></center>
-                  ) : (
-                    sortedAndFilteredGroups.map((group) => (
+                    {sortedAndFilteredGroups.map((group) => (
                       <tr
                         key={group.id}
                         onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
@@ -1041,10 +1053,10 @@ function Items() {
                           )}
                         </td>
                       </tr>
-                    )))}
+                    ))}
                 </tbody>
               </table>
-            </>
+                  )}</>
           )}{error && (
             <>
               <p style={{ color: 'red' }}>Ошибка: {error}</p>
@@ -1069,7 +1081,7 @@ function Items() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Поиск по имени товара"
+                  placeholder="Поиск по имени точки продаж"
                   className="form-control"
                   style={{
                     width: "100%",
@@ -1134,7 +1146,7 @@ function Items() {
                   type="text"
                   value={newRecordName}
                   onChange={(e) => setNewRecordName(e.target.value)}
-                  placeholder="Добавить товар"
+                  placeholder="Добавить точку продаж"
                   className="form-control"
                   style={{
                     width: "100%",
@@ -1201,6 +1213,9 @@ function Items() {
 
               </div>
               {/* таблица */}
+              {!isTableNotEmpty ? (
+                    <center><p>Данных пока нет</p></center>
+                  ) : (
               <table className="rtable">
                 <thead>
                   <tr>
@@ -1366,7 +1381,7 @@ function Items() {
                   ))}
                 </tbody>
               </table>
-            </>
+                  )}</>
           )}{error && (
             <>
               <p style={{ color: 'red' }}>Ошибка: {error}</p>
