@@ -272,6 +272,9 @@ function Items() {
   const [isTableGroupVisible, setIsTableGroupVisible] = useState(false);
   const [isTableProductVisible, setIsTableProductVisible] = useState(false);
 
+  const [isTableNotEmpty, setisTableNotEmpty] = useState(false);
+
+
   // Функция для переключения видимости таблицы
   const toggleTableVisibility = (value) => {
     setIsTableGroupVisible(value); // Меняем состояние на value
@@ -293,15 +296,26 @@ function Items() {
         throw new Error('Ошибка загрузки данных');
       }
       const data = await response.json();
-      setGroups(data); // Сохраняем данные в состоянии
+
+      // Проверяем, что data не null и является массивом
+      if (Array.isArray(data) && data.length > 0) {
+        setisTableNotEmpty(true); // Если массив не пустой
+      } else {
+        setisTableNotEmpty(false); // Если массив пустой или data не массив
+      }
+
+      setGroups(data || []); // Сохраняем данные или пустой массив
+
+      // setGroups(data); // Сохраняем данные в состоянии
     } catch (err) {
       setError(err.message); // Устанавливаем состояние ошибки
+      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
       addNotification("error", "", "База данных недоступна");
     } finally {
       setLoading(false);
     }
   };
-
+  
   // Функция для загрузки данных
   const fetchNomenklatura = async () => {
     setLoading(true);
@@ -312,9 +326,19 @@ function Items() {
         throw new Error('Ошибка загрузки данных');
       }
       const data = await response.json();
-      setGroups(data); // Сохраняем данные в состоянии
+      
+      // Проверяем, что data не null и является массивом
+      if (Array.isArray(data) && data.length > 0) {
+        setisTableNotEmpty(true); // Если массив не пустой
+      } else {
+        setisTableNotEmpty(false); // Если массив пустой или data не массив
+      }
+      
+      setGroups(data || []); // Сохраняем данные или пустой массив
+      // setGroups(data); // Сохраняем данные в состоянии
     } catch (err) {
       setError(err.message); // Устанавливаем состояние ошибки
+      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
       addNotification("error", "", "База данных недоступна");
     } finally {
       setLoading(false);
@@ -385,13 +409,13 @@ function Items() {
             address: editAddress
           }),
         });
-        
+
         if (!response.ok) {
           throw new Error(`Ошибка при обновлении: ${response.statusText}`);
         }
         const data = await response.json();
       } else if (isTableProductVisible) {
-        
+
         // Отправляем запрос на сервер
         const response = await fetch(`/api/salespoint/${id}`, {
           method: "PUT",
@@ -877,143 +901,147 @@ function Items() {
                 </thead>
                 <tbody>
                   {/* Строки с данными */}
-                  {sortedAndFilteredGroups.map((group) => (
-                    <tr
-                      key={group.id}
-                      onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
-                      onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
-                    >
-                      <td td className='col-storage-code4, black, fnt'>{group.id}</td>
-                      <td td className='col-storage-name4, black'>
-                        {editRowId === group.id ? (
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="form-control"
-                            style={{
-                              height: 28
-                            }}
-                          />
-                        ) : (
-                          <span className='fnt'>{group.name}</span>
-                        )}
-                      </td>
-                      <td td className='col-storage-address4, black'>
-                        {editRowId === group.id ? (
-                          <input
-                            type="text"
-                            value={editAddress}
-                            onChange={(e) => setAddressValue(e.target.value)}
-                            className="form-control"
-                            style={{
-                              height: 28
-                            }}
-                          />
-                        ) : (
-                          <span className='fnt'>{group.address}</span>
-                        )}
-                      </td>
-                      <td className="col-actions-center">
-                        {editRowId === group.id ? (
-                          <>
-                            {/* Кнопка "Сохранить" */}
-                            <button
-                              className="btn-icon btn-success"
-                              onClick={() => handleSaveClick(group.id)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3.5 3 17 17"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
+                  {!isTableNotEmpty ? (
+                    <tr><td></td><td>Данных нет</td><td></td><td></td></tr>
+                    // <center><p>Данных нет</p></center>
+                  ) : (
+                    sortedAndFilteredGroups.map((group) => (
+                      <tr
+                        key={group.id}
+                        onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
+                        onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
+                      >
+                        <td td className='col-storage-code4, black, fnt'>{group.id}</td>
+                        <td td className='col-storage-name4, black'>
+                          {editRowId === group.id ? (
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="form-control"
+                              style={{
+                                height: 28
+                              }}
+                            />
+                          ) : (
+                            <span className='fnt'>{group.name}</span>
+                          )}
+                        </td>
+                        <td td className='col-storage-address4, black'>
+                          {editRowId === group.id ? (
+                            <input
+                              type="text"
+                              value={editAddress}
+                              onChange={(e) => setAddressValue(e.target.value)}
+                              className="form-control"
+                              style={{
+                                height: 28
+                              }}
+                            />
+                          ) : (
+                            <span className='fnt'>{group.address}</span>
+                          )}
+                        </td>
+                        <td className="col-actions-center">
+                          {editRowId === group.id ? (
+                            <>
+                              {/* Кнопка "Сохранить" */}
+                              <button
+                                className="btn-icon btn-success"
+                                onClick={() => handleSaveClick(group.id)}
                               >
-                                <path
-                                  d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
-                                  stroke="#39bd00"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-
-                            {/* Кнопка "Отмена" */}
-                            <button
-                              className="btn-icon btn-warning"
-                              onClick={handleCancelClick}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="4.5 4.3 15 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
-                                transform="rotate(270)"
-                              >
-                                <path
-                                  d="M9.5 7L14.5 12L9.5 17"
+                                <svg
+                                  width="25px"
+                                  height="25px"
+                                  viewBox="3.5 3 17 17"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
                                   stroke="#000000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-                            {/* Кнопка "Удалить" */}
-                            <button
-                              className="btn-icon btn-danger"
-                              onClick={() => handleDeleteClick(group.id)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3 3 17 17"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
+                                  strokeWidth="2.4"
+                                >
+                                  <path
+                                    d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
+                                    stroke="#39bd00"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></path>
+                                </svg>
+                              </button>
+
+                              {/* Кнопка "Отмена" */}
+                              <button
+                                className="btn-icon btn-warning"
+                                onClick={handleCancelClick}
                               >
-                                <path
-                                  d="M7 17L16.8995 7.10051"
-                                  stroke="#ff0000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                                <path
-                                  d="M7 7.00001L16.8995 16.8995"
-                                  stroke="#ff0000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              className="btn-icon btn-danger"
-                              onClick={() => handleEditClick(group.id, group.name, group.address)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3 3 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="1.6"
+                                <svg
+                                  width="25px"
+                                  height="25px"
+                                  viewBox="4.5 4.3 15 15"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  stroke="#000000"
+                                  strokeWidth="2.4"
+                                  transform="rotate(270)"
+                                >
+                                  <path
+                                    d="M9.5 7L14.5 12L9.5 17"
+                                    stroke="#000000"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></path>
+                                </svg>
+                              </button>
+                              {/* Кнопка "Удалить" */}
+                              <button
+                                className="btn-icon btn-danger"
+                                onClick={() => handleDeleteClick(group.id)}
                               >
-                                <path d="M6 12H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 15.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 8.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path>                          </svg>
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                                <svg
+                                  width="25px"
+                                  height="25px"
+                                  viewBox="3 3 17 17"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  stroke="#000000"
+                                  strokeWidth="2.4"
+                                >
+                                  <path
+                                    d="M7 17L16.8995 7.10051"
+                                    stroke="#ff0000"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></path>
+                                  <path
+                                    d="M7 7.00001L16.8995 16.8995"
+                                    stroke="#ff0000"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></path>
+                                </svg>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                className="btn-icon btn-danger"
+                                onClick={() => handleEditClick(group.id, group.name, group.address)}
+                              >
+                                <svg
+                                  width="25px"
+                                  height="25px"
+                                  viewBox="3 3 18 18"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  stroke="#000000"
+                                  strokeWidth="1.6"
+                                >
+                                  <path d="M6 12H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 15.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 8.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path>                          </svg>
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    )))}
                 </tbody>
               </table>
             </>
