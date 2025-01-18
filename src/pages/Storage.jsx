@@ -9,17 +9,6 @@ import '../css/overItems.css';
 import '../css/overStorages.css';
 import '../css/threedotsloading.css'; // загрузка
 
-Dropdown.propTypes = {
-  options: PropTypes.arrayOf(PropTypes.string),
-  selected: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-};
-
-Dropdown.defaultProps = {
-  options: [],
-  selected: "",
-};
-
 // функция уведомлений
 function Notification({ type, title, message, onClose }) {
   return (
@@ -28,134 +17,6 @@ function Notification({ type, title, message, onClose }) {
       </button>
       <div className="notification-title">{title}</div>
       <div className="notification-message">{message}</div>
-    </div>
-  );
-}
-
-// Компонент Dropdown
-// v3
-function Dropdown({ options, selected, onChange }) {
-  const [isOpen, setIsOpen] = useState(false); // Управление видимостью списка
-  const [searchValue, setSearchValue] = useState(selected || ""); // Текущий текст
-
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchValue.toLowerCase())
-  );
-
-  const handleSelect = (value) => {
-    onChange(value); // Устанавливаем выбранное значение
-    setSearchValue(value); // Устанавливаем текст в поле ввода
-    setIsOpen(false); // Закрываем список
-  };
-
-  const handleFocus = () => {
-    setIsOpen(true); // Открываем список при фокусе
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => {
-      setIsOpen(false); // Закрываем список при потере фокуса
-    }, 200);
-  };
-
-  const handleClear = () => {
-    setSearchValue(""); // Очищаем текстовое поле
-    onChange(null); // Устанавливаем значение null для группы
-  };
-
-  return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <input
-        type="text"
-        value={searchValue}
-        onClick={handleFocus} // Открываем список при клике
-        onFocus={handleFocus} // Открываем список при фокусе
-        onBlur={handleBlur} // Закрываем список при потере фокуса
-        onChange={(e) => setSearchValue(e.target.value)} // Обновляем текст
-        placeholder="Выберите группу"
-        className="form-control"
-        style={{
-          height: 28,
-        }}
-      />
-      {isOpen && filteredOptions.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            width: "100%",
-            maxHeight: "150px",
-            overflowY: "auto",
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            zIndex: 1000,
-            marginTop: "5px",
-          }}
-        >
-          {filteredOptions.map((option, index) => (
-            <div
-              key={index}
-              onClick={() => handleSelect(option)} // Выбор значения
-              style={{
-                padding: "8px",
-                cursor: "pointer",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.backgroundColor = "#f5f5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.target.style.backgroundColor = "transparent")
-              }
-            >
-              {option}
-            </div>
-          ))}
-        </div>
-      )}
-      {searchValue && (
-        <button
-          onClick={handleClear}
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: "5px",
-            transform: "translateY(-50%)",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "16px",
-            color: "black",
-          }}
-        >
-
-          <svg
-            viewBox="0 2 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{
-              width: "25px",
-              height: "25px",
-            }}
-          >
-            {/* <rect width="24" height="24" fill="white"></rect> */}
-            <rect width="24" height="24"></rect>
-            <path
-              d="M7 17L16.8995 7.10051"
-              stroke="#595c5f"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            ></path>
-            <path
-              d="M7 7.00001L16.8995 16.8995"
-              stroke="#595c5f"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            ></path>
-          </svg>
-        </button>
-      )}
     </div>
   );
 }
@@ -263,7 +124,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
 }
 
 // основная функция
-function Items() {
+function Storage() {
   const [groups, setGroups] = useState([]); // Состояние для хранения данных
   const [loading, setLoading] = useState(false); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
@@ -1394,4 +1255,4 @@ function Items() {
   );
 }
 
-export default Items;
+export default Storage;
