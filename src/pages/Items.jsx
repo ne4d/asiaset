@@ -279,6 +279,8 @@ function Items() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
 
+  const [isTableNotEmpty, setisTableNotEmpty] = useState(false);
+
   // ----------------------------------------------------------------
   // Загрузка групп (пока что для вкладки "Группы")
   // ----------------------------------------------------------------
@@ -292,10 +294,20 @@ function Items() {
       }
       const data = await response.json();
       // data = [{id, name}, ...]
+      
+      // Проверяем, что data не null и является массивом
+      if (Array.isArray(data) && data.length > 0) {
+        setisTableNotEmpty(true); // Если массив не пустой
+      } else {
+        setisTableNotEmpty(false); // Если массив пустой или data не массив
+      }
 
-      setGroups(data);
+      // setGroups(data);
+      setGroups(data || []); // Сохраняем данные или пустой массив
+
     } catch (err) {
       setError(err.message);
+      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
       addNotification("error", "", "База данных недоступна");
     } finally {
       setLoading(false);
@@ -315,10 +327,19 @@ function Items() {
       }
       const data = await response.json();
       // data = [{ id, name, measurement, group_id, group_name }, ... ]
+      
+      // Проверяем, что data не null и является массивом
+      if (Array.isArray(data) && data.length > 0) {
+        setisTableNotEmpty(true); // Если массив не пустой
+      } else {
+        setisTableNotEmpty(false); // Если массив пустой или data не массив
+      }
 
-      setGroups(data);
+      // setGroups(data);
+      setGroups(data || []); // Сохраняем данные или пустой массив
     } catch (err) {
       setError(err.message);
+      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
       addNotification("error", "", "База данных недоступна");
     } finally {
       setLoading(false);
@@ -423,6 +444,7 @@ function Items() {
           setGroups((prev) => [...prev, { id: data.id, name: newRecordName }]);
           addNotification("success", "", "Группа успешно добавлена.");
           setNewRecordName("");
+          handleLoadGroups();
         }
       } catch (err) {
         console.error("Ошибка при добавлении записи:", err);
@@ -463,13 +485,14 @@ function Items() {
                 id: data.id,
                 name: newRecordName,
                 measurement: measurementValue,
-                group_id: 0, // или null, если не передавали
-                group_name: "",
+                // group_id: 0, // или null, если не передавали
+                // group_name: "",
               },
             ]);
             addNotification("success", "", "Товар успешно добавлен.");
             setNewRecordName("");
             setEditMeasurementValue("");
+            handleLoadProducts();
           } else {
             throw new Error("Неверный ответ от сервера");
           }
@@ -623,6 +646,11 @@ function Items() {
       addNotification("error", "", "Не удалось удалить запись. Попробуйте ещё раз.");
     } finally {
       setIsModalOpen(false);
+      if (isTableGroupVisible) {
+        handleLoadGroups();
+      } else if (isTableProductVisible) {
+        handleLoadProducts();
+      }
     }
   };
 
@@ -841,6 +869,9 @@ function Items() {
                 </button>
               </div>
               {/* Таблица групп */}
+              {!isTableNotEmpty ? (
+                    <center><p>Данных пока нет</p></center>
+                  ) : (
               <table className="rtable">
                 <thead>
                   <tr>
@@ -994,6 +1025,7 @@ function Items() {
                   ))}
                 </tbody>
               </table>
+                  )}
             </>
           )}
           {error && (
@@ -1146,6 +1178,9 @@ function Items() {
                 </button>
               </div>
               {/* Таблица товаров */}
+              {!isTableNotEmpty ? (
+                    <center><p>Данных пока нет</p></center>
+                  ) : (
               <table className="rtable">
                 <thead>
                   <tr>
@@ -1192,6 +1227,7 @@ function Items() {
                           />
                         ) : (
                           <Link
+                            // to={`/item/${item.id}`}
                             to={`/item/${item.id}`}
                             style={{
                               cursor: "pointer",
@@ -1359,6 +1395,7 @@ function Items() {
                   ))}
                 </tbody>
               </table>
+                  )}
             </>
           )}
           {error && (

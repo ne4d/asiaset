@@ -25,6 +25,7 @@
   background-size: 10px 100%, 10px 100%;
   background-attachment: scroll, scroll;
   background-repeat: no-repeat;
+  min-height: 300px;
 }
 
 .rtable td:first-child {
