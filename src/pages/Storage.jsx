@@ -3,6 +3,7 @@ import "../css/materialoutlinedbutton.css";
 import "../css/cssonlyresponcivetables_v2.css";
 import "../css/notifications.css";
 import "../css/threedotsloading.css"; // для индикатора загрузки
+import "../css/overStorages.css";
 
 function Notification({ type, title, message, onClose }) {
   return (
@@ -437,6 +438,10 @@ function Locations() {
                 width: "100%",
                 paddingLeft: 40,
                 // можно вставить svg иконку поиска...
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "10px center",
+                    backgroundSize: "20px 20px",
               }}
             />
             {searchTerm && (
@@ -556,8 +561,8 @@ function Locations() {
               <tbody>
                 {sortedAndFiltered.map((loc) => (
                   <tr key={loc.id}>
-                    <td>{loc.id}</td>
-                    <td>
+                    <td className="col-storage-code4">{loc.id}</td>
+                    <td className="col-storage-name4">
                       {editRowId === loc.id ? (
                         <input
                           type="text"
@@ -570,7 +575,7 @@ function Locations() {
                         <span>{loc.name}</span>
                       )}
                     </td>
-                    <td>
+                    <td className="col-storage-address4">
                       {editRowId === loc.id ? (
                         <input
                           type="text"
@@ -590,7 +595,7 @@ function Locations() {
                         ? "Точка продаж"
                         : loc.type}
                     </td> */}
-                    <td style={{ textAlign: "center" }}>
+                    <td className="col-storage-actions4">
                       {editRowId === loc.id ? (
                         <>
                           <button

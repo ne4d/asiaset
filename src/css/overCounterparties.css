@@ -1,0 +1,108 @@
+.btn-icon {
+    background: none;
+    border: none;
+    color: azure;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+    color: #000000;
+}
+
+.container {
+    padding: 0;
+}
+
+.table-container {
+    justify-content: center;
+}
+
+.add-group-width {
+    display: flex;
+    margin-bottom: 10px;
+    position: "relative";
+}
+
+.add-group-width input {
+    width: calc(100% - 60px);
+    margin-right: 3px;
+}
+
+.form-control {
+    border-color: #000000;
+}
+
+input.form-control:focus {
+    border-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 5px #212121;
+}
+
+.trable tr:hover {
+    background-color: #c00000;
+    /* Цвет фона при наведении */
+    cursor: pointer;
+    /* Меняем указатель мыши */
+}
+
+.col-actions-center {
+    text-align: center;
+    /* Горизонтальное выравнивание */
+    vertical-align: middle;
+    /* Вертикальное выравнивание */
+}
+
+/*  */
+
+/* стили колонок */
+/* 6 колонок */
+.rtable .col-code6 {
+    width: 3%;
+}
+
+.rtable .col-code6 .black {
+    /* width: 3%; */
+    color: black;
+}
+
+.rtable .col-name6 {
+    width: 30%;
+}
+
+.rtable .col-name6 .black {
+    color: black;
+    height: 30px;
+}
+
+.rtable .col-phone6 {
+    width: 27%;
+    min-width: 150px;
+}
+
+.rtable .col-address6 {
+    width: 27%;
+    min-width: 100px;
+}
+
+.rtable .col-type6 {
+    width: 12%;
+    min-width: 100px;
+}
+
+.rtable .col-actions6 {
+    width: 5%;
+    text-align: center;
+}
+
+.rtable .fxd-height {
+    height: 10px;
+}
+
+.rtable .fnt {
+    font-size: 16px;
+}

@@ -4,7 +4,8 @@ import PropTypes from "prop-types";
 import '../css/materialoutlinedbutton.css';
 import '../css/cssonlyresponcivetables_v2.css';
 import '../css/notifications.css'; // уведомления
-import '../css/overItems.css';
+// import '../css/overItems.css';
+import '../css/overCounterparties.css';
 import '../css/threedotsloading.css'; // загрузка
 
 // Notification
@@ -590,8 +591,8 @@ function Counterparties() {
               <tbody>
                 {sortedAndFiltered.map((c) => (
                   <tr key={c.id}>
-                    <td>{c.id}</td>
-                    <td>
+                    <td className='col-code6'>{c.id}</td>
+                    <td className='col-name6'>
                       {editRowId === c.id ? (
                         <input
                           type="text"
@@ -605,7 +606,7 @@ function Counterparties() {
                         <span>{c.name}</span>
                       )}
                     </td>
-                    <td>
+                    <td className='col-phone6'>
                       {editRowId === c.id ? (
                         <input
                           type="text"
@@ -619,7 +620,7 @@ function Counterparties() {
                         <span>{c.phone}</span>
                       )}
                     </td>
-                    <td>
+                    <td className='col-phone6'>
                       {editRowId === c.id ? (
                         <input
                           type="text"
@@ -633,7 +634,7 @@ function Counterparties() {
                         <span>{c.address}</span>
                       )}
                     </td>
-                    <td>
+                    <td className='col-type6'>
                       {editRowId === c.id ? (
                         <select
                           value={editRole}
@@ -655,7 +656,8 @@ function Counterparties() {
                       )}
                     </td>
 
-                    <td style={{ textAlign: "center" }}>
+                    {/* <td style={{ textAlign: "center" }}> */}
+                    <td className='col-actions6'>
                       {editRowId === c.id ? (
                         <>
                           <button
