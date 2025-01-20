@@ -413,6 +413,7 @@ function Items() {
       setNotifications((prev) => [...prev, nextNotification]);
       setTimeout(() => removeNotification(nextNotification.id), 3000);
     }
+    handleLoadGroups();// загрузка групп при открытии страницы
   }, [notifications, notificationQueue]);
 
   // ----------------------------------------------------------------

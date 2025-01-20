@@ -146,6 +146,7 @@ function Locations() {
       setNotifications((prev) => [...prev, nextNotification]);
       setTimeout(() => removeNotification(nextNotification.id), 3000);
     }
+    handleLoadStorages();//загрузка складов при открытии страницы
   }, [notifications, notificationQueue]);
 
   // -----------------------------------------------
