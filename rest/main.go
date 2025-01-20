@@ -11,7 +11,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"github.com/ne4d/asiaset/blob/0.1.20/rest/api"
+	"github.com/ne4d/asiaset/blob/0.1.21/rest/api"
 	// Здесь вы импортируете локальные пакеты с регистрацией маршрутов
 	// предположим, в папке api у нас лежат *.go файлы
 )
@@ -59,7 +59,8 @@ func main() {
 	api.RegisterNomenklaturaRoutes(r, db)
 	api.RegisterNomenklaturaGroupsRoutes(r, db)
 	api.RegisterCounterpartiesRoutes(r, db)
-	// api.RegisterLocationsRoutes(r, db)
+	api.RegisterNomenklaturaDetailsRoutes(r, db)
+	api.RegisterLocationsRoutes(r, db)
 	// ... и т.д.
 
 	// Пример: можно зарегистрировать debug

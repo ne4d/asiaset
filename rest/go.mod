@@ -1,5 +1,5 @@
 // module rest
-module github.com/ne4d/asiaset/blob/0.1.20/rest
+module github.com/ne4d/asiaset/blob/0.1.21/rest
 
 go 1.23.3
 

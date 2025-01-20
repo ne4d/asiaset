@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
-	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -166,10 +165,4 @@ func RegisterNomenklaturaDetailsRoutes(r *gin.Engine, db *sql.DB) {
 		log.Println("Описание успешно обновлено")
 	})
 
-	r.GET("/debug/routes", func(c *gin.Context) {
-		for _, route := range r.Routes() {
-			fmt.Printf("Method: %s, Path: %s\n", route.Method, route.Path)
-		}
-		c.String(http.StatusOK, "Check console for registered routes")
-	})
 }
