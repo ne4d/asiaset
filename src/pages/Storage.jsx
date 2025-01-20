@@ -1,64 +1,50 @@
+import React, { useState, useEffect, useMemo } from "react";
+import "../css/materialoutlinedbutton.css";
+import "../css/cssonlyresponcivetables_v2.css";
+import "../css/notifications.css";
+import "../css/threedotsloading.css"; // для индикатора загрузки
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import PropTypes from "prop-types";
-import '../css/materialoutlinedbutton.css';
-import '../css/cssonlyresponcivetables_v2.css';
-import '../css/notifications.css'; // уведомления
-import '../css/overItems.css';
-import '../css/overStorages.css';
-import '../css/threedotsloading.css'; // загрузка
-
-// функция уведомлений
 function Notification({ type, title, message, onClose }) {
   return (
     <div className={`notification notification-${type}`}>
-      <button className="notification-close" onClick={onClose}>
-      </button>
+      <button className="notification-close" onClick={onClose} />
       <div className="notification-title">{title}</div>
       <div className="notification-message">{message}</div>
     </div>
   );
 }
 
-// модальное окно подтверждения удаления
 function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
-  if (!isOpen) return null; // Не отображаем модальное окно, если оно закрыто
-
+  if (!isOpen) return null;
   return (
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        top: 0, left: 0,
+        width: "100vw", height: "100vh",
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex", justifyContent: "center", alignItems: "center",
         zIndex: 1000,
       }}
     >
       <div
         style={{
           backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "5px",
+          padding: 20,
+          borderRadius: 5,
           textAlign: "center",
-          marginLeft: "15px",
-          marginRight: "15px",
+          margin: "0 15px",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "0px", }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 0 }}>
           <thead>
             <tr>
               <th
                 colSpan="2"
                 style={{
-                  padding: "10px",
+                  padding: 10,
                   borderBottom: "1px solid #ddd",
-                  fontSize: "16px",
+                  fontSize: 16,
                 }}
               >
                 {message}
@@ -67,49 +53,27 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
           </thead>
           <tbody>
             <tr>
-              <td
-                style={{
-                  padding: "10px",
-                  borderTop: "1px solid #ddd",
-                }}
-              >
+              <td style={{ padding: 10, borderTop: "1px solid #ddd" }}>
                 <button
                   onClick={onConfirm}
                   style={{
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    padding: "10px 20px",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    marginTop: "10px",
-                    width: "70%",
-                    maxWidth: "200px",
-                    minWidth: "150px",
+                    backgroundColor: "#4CAF50", color: "white",
+                    padding: "10px 20px", border: "none",
+                    borderRadius: 5, cursor: "pointer",
+                    marginTop: 10, width: "70%", maxWidth: 200, minWidth: 150
                   }}
                 >
                   Да
                 </button>
               </td>
-              <td
-                style={{
-                  padding: "10px",
-                  borderTop: "1px solid #ddd",
-                }}
-              >
+              <td style={{ padding: 10, borderTop: "1px solid #ddd" }}>
                 <button
                   onClick={onClose}
                   style={{
-                    backgroundColor: "#f44336",
-                    color: "white",
-                    padding: "10px 20px",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    marginTop: "10px",
-                    width: "70%",
-                    maxWidth: "200px",
-                    minWidth: "150px",
+                    backgroundColor: "#f44336", color: "white",
+                    padding: "10px 20px", border: "none",
+                    borderRadius: 5, cursor: "pointer",
+                    marginTop: 10, width: "70%", maxWidth: 200, minWidth: 150
                   }}
                 >
                   Нет
@@ -123,478 +87,329 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, message }) {
   );
 }
 
-// основная функция
-function Storage() {
-  const [groups, setGroups] = useState([]); // Состояние для хранения данных
-  const [loading, setLoading] = useState(false); // Состояние загрузки
-  const [error, setError] = useState(null); // Состояние для ошибок
+function Locations() {
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState(null);
 
-  // Создаем состояние для управления видимостью таблицы
-  const [isTableGroupVisible, setIsTableGroupVisible] = useState(false);
-  const [isTableProductVisible, setIsTableProductVisible] = useState(false);
+  // Флаги режима (true => показываем склады; false => показываем точки продаж)
+  const [isStorageMode, setIsStorageMode] = useState(false);
+  const [isSalespointMode, setIsSalespointMode] = useState(false);
 
-  const [isTableNotEmpty, setisTableNotEmpty] = useState(false);
-
-
-  // Функция для переключения видимости таблицы
-  const toggleTableVisibility = (value) => {
-    setIsTableGroupVisible(value); // Меняем состояние на value
-  };
-
-  // Функция для переключения видимости таблицы
-  const toggleProductVisibility = (value) => {
-    setIsTableProductVisible(value); // Меняем состояние на value
-  };
-
-  // Функция для загрузки данных
-  const fetchGroups = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // const response = await fetch('/api/nomenklatura_groups');
-      const response = await fetch('/api/storages');
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки данных');
-      }
-      const data = await response.json();
-
-      // Проверяем, что data не null и является массивом
-      if (Array.isArray(data) && data.length > 0) {
-        setisTableNotEmpty(true); // Если массив не пустой
-      } else {
-        setisTableNotEmpty(false); // Если массив пустой или data не массив
-      }
-
-      setGroups(data || []); // Сохраняем данные или пустой массив
-
-      // setGroups(data); // Сохраняем данные в состоянии
-    } catch (err) {
-      setError(err.message); // Устанавливаем состояние ошибки
-      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
-      addNotification("error", "", "База данных недоступна");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Функция для загрузки данных
-  const fetchNomenklatura = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/salespoint');
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки данных');
-      }
-      const data = await response.json();
-      
-      // Проверяем, что data не null и является массивом
-      if (Array.isArray(data) && data.length > 0) {
-        setisTableNotEmpty(true); // Если массив не пустой
-      } else {
-        setisTableNotEmpty(false); // Если массив пустой или data не массив
-      }
-      
-      setGroups(data || []); // Сохраняем данные или пустой массив
-      // setGroups(data); // Сохраняем данные в состоянии
-    } catch (err) {
-      setError(err.message); // Устанавливаем состояние ошибки
-      setisTableNotEmpty(false); // Устанавливаем false в случае ошибки
-      addNotification("error", "", "База данных недоступна");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Обработчик кнопки "Группы"
-  const handleLoadGroups = () => {
-    fetchGroups();
-    toggleTableVisibility(true);
-    toggleProductVisibility(false);
-    setEditRowId(null);
-    setSearchTerm("");
-  };
-  // Обработчик кнопки "Группы"
-  const handleLoadProducts = () => {
-    fetchNomenklatura();
-    toggleTableVisibility(false);
-    toggleProductVisibility(true);
-    setEditRowId(null);
-    setSearchTerm("");
-  };
-
-  const [editRowId, setEditRowId] = useState(null); // ID строки, которая редактируется
-  const [editValue, setEditValue] = useState(""); // Значение для редактирования
-  const [editAddress, setAddressValue] = useState(""); // Значение для редактирования
-  const [hoverRowId, setHoverRowId] = useState(null); // ID строки, на которую наведена мышь
-
-  const [editMeasurementValue, setEditMeasurementValue] = useState("");
-  const [editGroupValue, setEditGroupValue] = useState("");
-
-  // const handleEditClick = (id, currentValue) => {
-  // const handleEditClick = (id, currentValue, currentMeasurement, currentGroup) => {
-  const handleEditClick = (id, currentValue, currentAddress) => {
-    setEditRowId(id); // Устанавливаем редактируемую строку
-    setEditValue(currentValue); // Подставляем текущее значение
-    setAddressValue(currentAddress);
-    // if (isTableProductVisible) {
-    //   setEditMeasurementValue(currentMeasurement); // Устанавливаем текущее значение измерения
-    //   setSelectedGroup(currentGroup); // Устанавливаем текущее значение группы
-    // }
-  };
-
-  // функция удаления текста в поле поиска
-  const handleCancelClick = () => {
-    setEditRowId(null); // Отменяем редактирование
-    setEditValue(""); // Очищаем значение
-  };
-
-  // блок сохранения редактируемой записи
-  const handleSaveClick = async (id) => {
-    try {
-      // Получаем текущую группу из состояния
-      const currentGroup = groups.find((group) => group.id === id);
-
-      // Проверяем, изменилось ли значение
-      if (currentGroup.name === editValue && currentGroup.address == editAddress) {
-        addNotification("info", "", "Изменений не найдено.");
-        setEditRowId(null);
-        setEditValue("");
-        return; // Выходим из функции, чтобы не отправлять запрос
-      }
-
-      if (isTableGroupVisible) {
-        const response = await fetch(`/api/storages/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: editValue,
-            address: editAddress
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Ошибка при обновлении: ${response.statusText}`);
-        }
-        const data = await response.json();
-      } else if (isTableProductVisible) {
-
-        // Отправляем запрос на сервер
-        const response = await fetch(`/api/salespoint/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: editValue,
-            address: editAddress
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Ошибка при обновлении: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-      }
-      setGroups((prevGroups) =>
-        prevGroups.map((group) =>
-          group.id === id ? { ...group, name: editValue, address: editAddress } : group
-        )
-      );
-      if (isTableGroupVisible) {
-        addNotification("success", "", "Склад успешн обновлен.");
-      } else if (isTableProductVisible) {
-        addNotification("success", "", "Точка продаж успешно обновлена.");
-      }
-      setEditRowId(null);
-      setEditValue("");
-    } catch (error) {
-      console.error("Ошибка сохранения:", error);
-      addNotification("error", "", "Не удалось обновить запись. Попробуйте ещё раз.");
-    }
-  };
-
-  // блок удаления записи
-  // v2
-  const handleDeleteClick = (id) => {
-    const group = groups.find((group) => group.id === id);
-    setRowToDelete(group); // Сохраняем данные удаляемой строки
-    setIsModalOpen(true); // Открываем модальное окно
-  };
-
-  const confirmDelete = async () => {
-    const id = rowToDelete.id;
-    try {
-      const url = isTableGroupVisible
-        ? `/api/storages/${id}`
-        : `/api/salespoint/${id}`;
-      const response = await fetch(url, { method: "DELETE" });
-
-      if (!response.ok) {
-        throw new Error(`Ошибка при удалении: ${response.statusText}`);
-      }
-
-      setGroups((prevGroups) => prevGroups.filter((group) => group.id !== id));
-      addNotification("success", "", "Запись успешно удалена.");
-    } catch (error) {
-      console.error("Ошибка удаления:", error);
-      addNotification("error", "", "Не удалось удалить запись. Попробуйте ещё раз.");
-    } finally {
-      setIsModalOpen(false); // Закрываем окно
-      isTableGroupVisible ? handleLoadGroups() : handleLoadProducts();
-    }
-  };
-
-  // блок создания новой записи
-  const [newRecordName, setNewRecordName] = useState(""); // Состояние для новой записи
-
-  // const addAndUpdate = (value) => {
-  //   setNewRecordName(value); // Отменяем редактирование
-  //   isTableGroupVisible ? handleLoadGroups() : handleLoadProducts();
-  // };
-
-  const handleAddClick = async () => {
-    if (isTableGroupVisible) {
-      if (!newRecordName.trim()) {
-        addNotification("error", "", "Название склада не может быть пустым");
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/storages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: newRecordName }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 409) { // Например, если группа уже существует
-            addNotification("warning", "", "Такой склад уже существует.");
-          } else {
-            throw new Error("Ошибка добавления записи");
-          }
-        } else {
-          const data = await response.json();
-          setGroups((prevGroups) => [...prevGroups, { id: data.id, name: newRecordName }]);
-          addNotification("success", "", "Склад успешно добавлен.");
-          setNewRecordName(""); // Очистить поле ввода
-          handleLoadGroups();
-        }
-      } catch (err) {
-        console.error("Ошибка при добавлении записи:", err);
-        addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
-      }
-
-      // v2
-    } else if (isTableProductVisible) {
-      // Проверяем, что имя товара не пустое
-      if (!newRecordName.trim()) {
-        addNotification("error", "", "Название точки продаж не может быть пустым");
-        return;
-      }
-
-      // Устанавливаем значение измерения по умолчанию, если оно не задано
-      const measurementValue = editMeasurementValue.trim() || "шт";
-
-      try {
-        const response = await fetch("/api/salespoint", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: newRecordName,
-            measurement: measurementValue
-          }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 409) {
-            addNotification("warning", "", "Такая точка продаж уже существует.");
-          } else {
-            throw new Error("Ошибка добавления записи");
-          }
-          return; // Прекращаем выполнение в случае ошибки
-        }
-
-        const data = await response.json();
-
-        if (data && data.id) {
-          setGroups((prevGroups) => [
-            ...prevGroups,
-            { id: data.id, name: newRecordName, measurement: measurementValue },
-          ]);
-          addNotification("success", "", "Точка продаж успешно добавлена.");
-          setNewRecordName(""); // Очистить поле ввода
-          setEditMeasurementValue(""); // Сбросить измерение
-          handleLoadProducts();
-        } else {
-          throw new Error("Неверный ответ от сервера");
-        }
-      } catch (err) {
-        console.error("Ошибка при добавлении записи:", err);
-        addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
-      }
-    }
-
-  };
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredGroups = groups.filter((group) =>
-    group.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // блок уведомлений
-  const [notifications, setNotifications] = useState([]);
+  // Уведомления
+  const [notifications, setNotifications]         = useState([]);
   const [notificationQueue, setNotificationQueue] = useState([]);
   const MAX_NOTIFICATIONS = 3;
 
-  // Функция для добавления уведомления
-  const addNotification = (type, title, message) => {
-    const id = Date.now(); // Уникальный ID для каждого уведомления
+  // Поиск/фильтр (по имени на фронте, если хотите)
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // Состояние сортировки
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "ascending" });
+
+  // Для редактирования
+  const [editRowId, setEditRowId]       = useState(null);
+  const [editName, setEditName]         = useState("");
+  const [editAddress, setEditAddress]   = useState("");
+
+  // Для добавления
+  const [newRecordName, setNewRecordName] = useState("");
+
+  // Модалка удаления
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState(null);
+
+  // Флаг "не пусто?"
+  const [isTableNotEmpty, setIsTableNotEmpty] = useState(false);
+
+  // -----------------------------------------------
+  // Уведомления
+  // -----------------------------------------------
+  const addNotification = (type, title, message) => {
+    const id = Date.now();
     if (notifications.length < MAX_NOTIFICATIONS) {
       setNotifications((prev) => [...prev, { id, type, title, message }]);
-
-      // Удаляем уведомление через 3 секунды
-      setTimeout(() => {
-        removeNotification(id);
-      }, 3000);
+      setTimeout(() => removeNotification(id), 3000);
     } else {
-      // Если превышен лимит, добавляем уведомление в очередь
       setNotificationQueue((prev) => [...prev, { id, type, title, message }]);
     }
   };
-
-  // Функция для удаления уведомления
   const removeNotification = (id) => {
-    setNotifications((prev) => {
-      const updated = prev.filter((notif) => notif.id !== id);
-      return updated;
-    });
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
-
-  // Используем useEffect для перемещения уведомлений из очереди
+  // Чтобы очередь уведомлений работала
   useEffect(() => {
     if (notifications.length < MAX_NOTIFICATIONS && notificationQueue.length > 0) {
       const [nextNotification, ...restQueue] = notificationQueue;
       setNotificationQueue(restQueue);
       setNotifications((prev) => [...prev, nextNotification]);
-
-      // Удаляем уведомление через 3 секунды
-      setTimeout(() => {
-        removeNotification(nextNotification.id);
-      }, 3000);
+      setTimeout(() => removeNotification(nextNotification.id), 3000);
     }
   }, [notifications, notificationQueue]);
 
-  // Пример использования уведомлений
-  // const handleSuccess = () => {
-  //   addNotification("success", "Успех!", "Ваш запрос выполнен успешно.");
-  // };
+  // -----------------------------------------------
+  // Загрузка (GET /api/locations?type=...)
+  // -----------------------------------------------
+  const fetchLocations = async (theType) => {
+    setLoading(true);
+    setError(null);
 
-  // const handleError = () => {
-  //   addNotification("error", "Ошибка!", "Ваш запрос завершился с ошибкой.");
-  // };
+    // Формируем URL: /api/locations?type=storage или salespoint
+    let url = "/api/locations";
+    if (theType) {
+      url += `?type=${theType}`; 
+    }
 
-  // const handleInfo = () => {
-  //   addNotification("info", "Информация", "Проверьте новые функции.");
-  // };
-
-  // const handleWarning = () => {
-  //   addNotification("warning", "Предупреждение!", "Батарея почти разряжена.");
-  // };
-
-
-  // блок управления значениями группы
-  const [groupOptions, setGroupOptions] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(""); // Текущее выбранное значение группы
-
-  useEffect(() => {
-    const fetchGroupOptions = async () => {
-      try {
-        const response = await fetch('/api/storages');
-        const data = await response.json();
-        setGroupOptions(data.map((group) => group.name)); // Только `name`
-      } catch (err) {
-        console.error("Ошибка загрузки групп:", err);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Ошибка загрузки данных");
       }
-    };
-
-    fetchGroupOptions();
-  }, []);
-
-  // блок сортировки
-  // Состояние сортировки
-  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "ascending" });
-
-  // v2
-  const sortedAndFilteredGroups = useMemo(() => {
-    let filtered = groups.filter((group) =>
-      group.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (!sortConfig.key) return filtered; // Если нет сортировки, возвращаем отфильтрованные данные
-
-    filtered.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-
-      // Сравнение чисел и строк
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortConfig.direction === "ascending" ? aValue - bValue : bValue - aValue;
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setIsTableNotEmpty(true);
       } else {
-        return sortConfig.direction === "ascending"
-          ? String(aValue).localeCompare(String(bValue))
-          : String(bValue).localeCompare(String(aValue));
+        setIsTableNotEmpty(false);
       }
-    });
+      setLocations(data || []);
+    } catch (err) {
+      setError(err.message);
+      setIsTableNotEmpty(false);
+      addNotification("error", "", "Не удалось загрузить локации");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return filtered;
-  }, [groups, searchTerm, sortConfig]);
+  // -----------------------------------------------
+  // Кнопки «Склады» / «Точки продаж»
+  // -----------------------------------------------
+  const handleLoadStorages = () => {
+    setIsStorageMode(true);
+    setIsSalespointMode(false);
+    setEditRowId(null);
+    // Запрашиваем только type=storage
+    fetchLocations("storage");
+  };
 
+  const handleLoadSalespoints = () => {
+    setIsStorageMode(false);
+    setIsSalespointMode(true);
+    setEditRowId(null);
+    // Запрашиваем только type=salespoint
+    fetchLocations("salespoint");
+  };
+
+  // -----------------------------------------------
+  // Добавление (POST /api/locations)
+  // -----------------------------------------------
+  const handleAddClick = async () => {
+    if (!newRecordName.trim()) {
+      addNotification("error", "", "Имя не может быть пустым");
+      return;
+    }
+
+    let typeValue = "";
+    if (isStorageMode) {
+      typeValue = "storage";
+    } else if (isSalespointMode) {
+      typeValue = "salespoint";
+    } else {
+      addNotification("error", "", "Сначала выберите режим (Склад или Точка продаж)");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/locations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newRecordName.trim(),
+          address: "",
+          type: typeValue,
+        }),
+      });
+      if (!response.ok) {
+        if (response.status === 409) {
+          addNotification("warning", "", "Такая локация уже существует.");
+        } else {
+          throw new Error("Ошибка добавления записи");
+        }
+      } else {
+        const data = await response.json();
+        addNotification("success", "", "Локация успешно добавлена.");
+        setNewRecordName("");
+        // Обновим список
+        fetchLocations(typeValue);
+      }
+    } catch (err) {
+      console.error("Ошибка при добавлении:", err);
+      addNotification("error", "", "Не удалось добавить запись. Попробуйте ещё раз.");
+    }
+  };
+
+  // -----------------------------------------------
+  // Редактирование: заходим в режим
+  // -----------------------------------------------
+  const handleEditClick = (id, currentName, currentAddr) => {
+    setEditRowId(id);
+    setEditName(currentName || "");
+    setEditAddress(currentAddr || "");
+  };
+
+  const handleCancelClick = () => {
+    setEditRowId(null);
+    setEditName("");
+    setEditAddress("");
+  };
+
+  // -----------------------------------------------
+  // Сохранение (PUT /api/locations/:id)
+  // -----------------------------------------------
+  const handleSaveClick = async (id) => {
+    const current = locations.find((loc) => loc.id === id);
+    if (!current) return;
+
+    const newName    = editName.trim();
+    const newAddress = editAddress.trim();
+    // type оставляем прежний, чтобы не менять склад -> точку
+    // (Если хотите дать выбор, можно завести setEditType.)
+    const oldType    = current.type;
+
+    // Проверка изменений
+    if (
+      current.name === newName &&
+      (current.address || "") === newAddress
+    ) {
+      addNotification("info", "", "Изменений не найдено");
+      handleCancelClick();
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/locations/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newName,
+          address: newAddress,
+          type: oldType, // оставим как было
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Ошибка при обновлении");
+      }
+      addNotification("success", "", "Локация успешно обновлена.");
+      
+      // Обновим список
+      if (isStorageMode) {
+        fetchLocations("storage");
+      } else if (isSalespointMode) {
+        fetchLocations("salespoint");
+      }
+      handleCancelClick();
+    } catch (err) {
+      console.error("Ошибка при обновлении:", err);
+      addNotification("error", "", "Не удалось обновить запись.");
+    }
+  };
+
+  // -----------------------------------------------
+  // Удаление (DELETE /api/locations/:id)
+  // -----------------------------------------------
+  const handleDeleteClick = (id) => {
+    const toDelete = locations.find((loc) => loc.id === id);
+    setRowToDelete(toDelete);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!rowToDelete) return;
+
+    try {
+      const response = await fetch(`/api/locations/${rowToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Ошибка при удалении");
+      }
+      addNotification("success", "", "Запись успешно удалена.");
+      setLocations((prev) => prev.filter((loc) => loc.id !== rowToDelete.id));
+    } catch (err) {
+      console.error("Ошибка удаления:", err);
+      addNotification("error", "", "Не удалось удалить запись.");
+    } finally {
+      setIsModalOpen(false);
+      setRowToDelete(null);
+    }
+  };
+
+  // -----------------------------------------------
+  // Сортировка (по name, id, address)
+  // -----------------------------------------------
   const handleSort = (key) => {
-    setSortConfig((prevConfig) => {
+    setSortConfig((prev) => {
       const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
+        prev.key === key && prev.direction === "ascending"
           ? "descending"
           : "ascending";
       return { key, direction: newDirection };
     });
   };
 
-  // переменные модального окна
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [rowToDelete, setRowToDelete] = useState(null);
+  const sortedAndFiltered = useMemo(() => {
+    let filtered = locations.filter((loc) =>
+      loc.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  // блок кода страницы
+    if (!sortConfig.key) return filtered;
+
+    filtered.sort((a, b) => {
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
+      } else {
+        return sortConfig.direction === "ascending"
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      }
+    });
+
+    return filtered;
+  }, [locations, searchTerm, sortConfig]);
+
+  // -----------------------------------------------
+  // Рендер
+  // -----------------------------------------------
   return (
     <div style={{ alignItems: "center" }}>
-      <h2>Склады и точки продаж</h2>
-      <div style={{ marginTop: "15px", marginBottom: "10px" }}>
-        <button onClick={handleLoadGroups} class="pure-material-button-outlined">Склады</button>
-        <button onClick={handleLoadProducts} class="pure-material-button-outlined">Точки продаж</button>
+      <h2>Склады и Точки продаж</h2>
+      <div style={{ marginTop: 15, marginBottom: 10 }}>
+        <button onClick={handleLoadStorages} className="pure-material-button-outlined">
+          Склады
+        </button>
+        <button onClick={handleLoadSalespoints} className="pure-material-button-outlined">
+          Точки продаж
+        </button>
       </div>
 
-      {/* Контейнер для уведомлений */}
+      {/* Уведомления */}
       <div id="notification-container">
-        {notifications.map((notif) => (
+        {notifications.map((n) => (
           <Notification
-            key={notif.id}
-            type={notif.type}
-            title={notif.title}
-            message={notif.message}
-            onClose={() => removeNotification(notif.id)}
+            key={n.id}
+            type={n.type}
+            title={n.title}
+            message={n.message}
+            onClose={() => removeNotification(n.id)}
           />
         ))}
       </div>
 
-      {/* рендер модального окна */}
+      {/* Модальное окно подтверждения удаления */}
       <ConfirmationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -602,657 +417,269 @@ function Storage() {
         message={`Вы уверены, что хотите удалить "${rowToDelete?.name}"?`}
       />
 
-      {isTableGroupVisible && ( // Условное отображение таблицы
+      {loading ? (
+        <div className="snippet" data-title="dot-spin">
+          <div className="stage">
+            <div className="dot-spin"></div>
+          </div>
+        </div>
+      ) : (
         <div className="table-container">
-          {loading ? (
-            <div class="snippet" data-title="dot-spin">
-              <div class="stage">
-                <div class="dot-spin"></div>
-              </div>
-            </div>
+          {/* Поиск */}
+          <div className="add-group-width">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Поиск по имени"
+              className="form-control"
+              style={{
+                width: "100%",
+                paddingLeft: 40,
+                // можно вставить svg иконку поиска...
+              }}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                style={{
+                  position: "absolute", top: 127, right: 15,
+                  transform: "translateY(-50%)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 16,
+                  color: "black",
+                }}
+              >
+                {/* иконка очистить */}
+                <svg
+                  viewBox="0 2 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ width: 25, height: 25 }}
+                >
+                  <rect width="24" height="24" />
+                  <path d="M7 17L16.8995 7.10051" stroke="#595c5f" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M7 7.00001L16.8995 16.8995" stroke="#595c5f" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Добавление новой записи */}
+          <div className="add-group-width">
+            <input
+              type="text"
+              value={newRecordName}
+              onChange={(e) => setNewRecordName(e.target.value)}
+              placeholder={
+                isStorageMode
+                  ? "Добавить склад"
+                  : isSalespointMode
+                  ? "Добавить точку продаж"
+                  : "Сначала нажмите одну из кнопок выше"
+              }
+              className="form-control"
+              style={{
+                width: "100%",
+                paddingRight: 40,
+              }}
+            />
+            {newRecordName && (
+              <button
+                onClick={() => setNewRecordName("")}
+                style={{
+                  position: "absolute", top: 175, right: 65,
+                  transform: "translateY(-50%)",
+                  background: "transparent", border: "none",
+                  cursor: "pointer", fontSize: 16, color: "black",
+                }}
+              >
+                {/* иконка очистить */}
+                <svg
+                  viewBox="0 2 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  style={{ width: 25, height: 25 }}
+                >
+                  <rect width="24" height="24" />
+                  <path d="M7 17L16.8995 7.10051" stroke="#595c5f" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M7 7.00001L16.8995 16.8995" stroke="#595c5f" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+            <button
+              className="btn-icon btn-success"
+              onClick={handleAddClick}
+              title="Добавить запись"
+              style={{ paddingLeft: 15 }}
+            >
+              {/* галочка */}
+              <svg
+                width="25px" height="25px"
+                viewBox="3.5 3 17 17"
+                fill="none" xmlns="http://www.w3.org/2000/svg"
+                stroke="#000000" strokeWidth="2.4"
+              >
+                <path
+                  d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
+                  stroke="#39bd00" strokeLinecap="round" strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {!isTableNotEmpty ? (
+            <center><p>Данных пока нет</p></center>
           ) : (
-            <>
-              {/* Строка для поиска записи */}
-              <div className='add-group-width'>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Поиск по имени склада"
-                  className="form-control"
-                  style={{
-                    width: "100%",
-                    paddingLeft: "40px", // Увеличиваем отступ для текста
-                    // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "10px center", // Позиция иконки
-                    backgroundSize: "20px 20px", // Размер иконки
-                  }}
-                />
-                {/* Кнопка для очистки поля */}
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")} // Очищаем текст при нажатии
-                    style={{
-                      position: "absolute",
-                      // top: "50%",
-                      top: "127px",
-                      // right: "10px",
-                      right: "15px",
-                      transform: "translateY(-50%)",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      color: "black",
-                    }}
-                  >
-
-                    <svg
-                      viewBox="0 2 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                      }}
-                    >
-                      {/* <rect width="24" height="24" fill="white"></rect> */}
-                      <rect width="24" height="24"></rect>
-                      <path
-                        d="M7 17L16.8995 7.10051"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                      <path
-                        d="M7 7.00001L16.8995 16.8995"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {/* Строка для добавления новой записи */}
-              {/* v2 */}
-              <div className='add-group-width'>
-                <input
-                  type="text"
-                  value={newRecordName}
-                  onChange={(e) => setNewRecordName(e.target.value)}
-                  // onChange={(e) => addAndUpdate(e.target.value)}
-                  placeholder="Добавить склад"
-                  className="form-control"
-                  style={{
-                    width: "100%",
-                    paddingRight: "40px", // Увеличиваем отступ для кнопки очистки
-                  }}
-                />
-                {newRecordName && (
-                  <button
-                    onClick={() => setNewRecordName("")} // Очищаем текст при нажатии
-                    style={{
-                      position: "absolute",
-                      // top: "50%",
-                      top: "175px",
-                      // right: "55px",
-                      right: "65px",
-                      transform: "translateY(-50%)",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      color: "black",
-                    }}
-                  >
-                    <svg
-                      viewBox="0 2 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                      }}
-                    >
-                      {/* <rect width="24" height="24" fill="white"></rect> */}
-                      <rect width="24" height="24"></rect>
-                      <path
-                        d="M7 17L16.8995 7.10051"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                      <path
-                        d="M7 7.00001L16.8995 16.8995"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                    </svg>
-                  </button>
-                )}
-                <button
-                  className="btn-icon btn-success"
-                  onClick={handleAddClick}
-                  title="Добавить запись"
-                  style={{ paddingLeft: "15px" }}>
-                  <svg
-                    width="25px"
-                    height="25px"
-                    viewBox="3.5 3 17 17"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="#000000"
-                    strokeWidth="2.4"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7" stroke="#39bd00" strokeLinecap="round" strokeLinejoin="round"></path></g></svg>
-                </button>
-
-              </div>
-              {/* таблица */}
-              {!isTableNotEmpty ? (
-                    <center><p>Данных пока нет</p></center>
-                  ) : (
-              <table className="rtable">
-                <thead>
-                  <th className="col-storage-code4" onClick={() => handleSort("id")}>
+            <table className="rtable">
+              <thead>
+                <tr>
+                  <th onClick={() => handleSort("id")}>
                     Код
-                    {sortConfig.key === "id" && (
-                      <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
-                    )}
+                    {sortConfig.key === "id" &&
+                      (sortConfig.direction === "ascending" ? " ▲" : " ▼")}
                   </th>
-                  <th className="col-storage-name4" onClick={() => handleSort("name")}>
-                    Имя склада
-                    {sortConfig.key === "name" && (
-                      <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
-                    )}
+                  <th onClick={() => handleSort("name")}>
+                    Имя
+                    {sortConfig.key === "name" &&
+                      (sortConfig.direction === "ascending" ? " ▲" : " ▼")}
                   </th>
-                  <th className="col-storage-address4" onClick={() => handleSort("address")}>
-                    Адрес склада
-                    {sortConfig.key === "address" && (
-                      <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
-                    )}
+                  <th onClick={() => handleSort("address")}>
+                    Адрес
+                    {sortConfig.key === "address" &&
+                      (sortConfig.direction === "ascending" ? " ▲" : " ▼")}
                   </th>
-                  <th className='col-storage-actions4'></th>
-                </thead>
-                <tbody>
-                  {/* Строки с данными */}
-                    {sortedAndFilteredGroups.map((group) => (
-                      <tr
-                        key={group.id}
-                        onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
-                        onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
-                      >
-                        <td td className='col-storage-code4, black, fnt'>{group.id}</td>
-                        <td td className='col-storage-name4, black'>
-                          {editRowId === group.id ? (
-                            <input
-                              type="text"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              className="form-control"
-                              style={{
-                                height: 28
-                              }}
-                            />
-                          ) : (
-                            <span className='fnt'>{group.name}</span>
-                          )}
-                        </td>
-                        <td td className='col-storage-address4, black'>
-                          {editRowId === group.id ? (
-                            <input
-                              type="text"
-                              value={editAddress}
-                              onChange={(e) => setAddressValue(e.target.value)}
-                              className="form-control"
-                              style={{
-                                height: 28
-                              }}
-                            />
-                          ) : (
-                            <span className='fnt'>{group.address}</span>
-                          )}
-                        </td>
-                        <td className="col-actions-center">
-                          {editRowId === group.id ? (
-                            <>
-                              {/* Кнопка "Сохранить" */}
-                              <button
-                                className="btn-icon btn-success"
-                                onClick={() => handleSaveClick(group.id)}
-                              >
-                                <svg
-                                  width="25px"
-                                  height="25px"
-                                  viewBox="3.5 3 17 17"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  stroke="#000000"
-                                  strokeWidth="2.4"
-                                >
-                                  <path
-                                    d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
-                                    stroke="#39bd00"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></path>
-                                </svg>
-                              </button>
-
-                              {/* Кнопка "Отмена" */}
-                              <button
-                                className="btn-icon btn-warning"
-                                onClick={handleCancelClick}
-                              >
-                                <svg
-                                  width="25px"
-                                  height="25px"
-                                  viewBox="4.5 4.3 15 15"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  stroke="#000000"
-                                  strokeWidth="2.4"
-                                  transform="rotate(270)"
-                                >
-                                  <path
-                                    d="M9.5 7L14.5 12L9.5 17"
-                                    stroke="#000000"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></path>
-                                </svg>
-                              </button>
-                              {/* Кнопка "Удалить" */}
-                              <button
-                                className="btn-icon btn-danger"
-                                onClick={() => handleDeleteClick(group.id)}
-                              >
-                                <svg
-                                  width="25px"
-                                  height="25px"
-                                  viewBox="3 3 17 17"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  stroke="#000000"
-                                  strokeWidth="2.4"
-                                >
-                                  <path
-                                    d="M7 17L16.8995 7.10051"
-                                    stroke="#ff0000"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></path>
-                                  <path
-                                    d="M7 7.00001L16.8995 16.8995"
-                                    stroke="#ff0000"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></path>
-                                </svg>
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                className="btn-icon btn-danger"
-                                onClick={() => handleEditClick(group.id, group.name, group.address)}
-                              >
-                                <svg
-                                  width="25px"
-                                  height="25px"
-                                  viewBox="3 3 18 18"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  stroke="#000000"
-                                  strokeWidth="1.6"
-                                >
-                                  <path d="M6 12H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 15.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 8.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path>                          </svg>
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-                  )}</>
-          )}{error && (
-            <>
-              <p style={{ color: 'red' }}>Ошибка: {error}</p>
-            </>
-          )}
-        </div>
-      )
-      } {/*конец скрывающейся таблицы*/}
-      {isTableProductVisible && ( // Условное отображение таблицы
-        <div className="table-container">
-          {loading ? (
-            <div class="snippet" data-title="dot-spin">
-              <div class="stage">
-                <div class="dot-spin"></div>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Строка для поиска записи */}
-              <div className='add-group-width'>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Поиск по имени точки продаж"
-                  className="form-control"
-                  style={{
-                    width: "100%",
-                    paddingLeft: "40px", // Увеличиваем отступ для текста
-                    // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24" fill="white"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none"><g><rect width="24" height="24"></rect><circle cx="10.5" cy="10.5" r="6.5" stroke="%23595c5f" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="%23595c5f"></path></g></svg>')`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "10px center", // Позиция иконки
-                    backgroundSize: "20px 20px", // Размер иконки
-                  }}
-                />
-                {/* Кнопка для очистки поля */}
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")} // Очищаем текст при нажатии
-                    style={{
-                      position: "absolute",
-                      // top: "50%",
-                      top: "127px",
-                      // right: "10px",
-                      right: "15px",
-                      transform: "translateY(-50%)",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      color: "black",
-                    }}
-                  >
-
-                    <svg
-                      viewBox="0 2 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                      }}
-                    >
-                      {/* <rect width="24" height="24" fill="white"></rect> */}
-                      <rect width="24" height="24"></rect>
-                      <path
-                        d="M7 17L16.8995 7.10051"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                      <path
-                        d="M7 7.00001L16.8995 16.8995"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {/* Строка для добавления новой записи */}
-              {/* v2 */}
-              <div className='add-group-width'>
-                <input
-                  type="text"
-                  value={newRecordName}
-                  onChange={(e) => setNewRecordName(e.target.value)}
-                  placeholder="Добавить точку продаж"
-                  className="form-control"
-                  style={{
-                    width: "100%",
-                    paddingRight: "40px", // Увеличиваем отступ для кнопки очистки
-                  }}
-                />
-                {newRecordName && (
-                  <button
-                    onClick={() => setNewRecordName("")} // Очищаем текст при нажатии
-                    style={{
-                      position: "absolute",
-                      // top: "50%",
-                      top: "175px",
-                      // right: "55px",
-                      right: "65px",
-                      transform: "translateY(-50%)",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      color: "black",
-                    }}
-                  >
-                    <svg
-                      viewBox="0 2 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                      }}
-                    >
-                      {/* <rect width="24" height="24" fill="white"></rect> */}
-                      <rect width="24" height="24"></rect>
-                      <path
-                        d="M7 17L16.8995 7.10051"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                      <path
-                        d="M7 7.00001L16.8995 16.8995"
-                        stroke="#595c5f"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      ></path>
-                    </svg>
-                  </button>
-                )}
-                <button
-                  className="btn-icon btn-success"
-                  onClick={handleAddClick}
-                  title="Добавить запись"
-                  style={{ paddingLeft: "15px" }}>
-                  <svg
-                    width="25px"
-                    height="25px"
-                    viewBox="3.5 3 17 17"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="#000000"
-                    strokeWidth="2.4"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7" stroke="#39bd00" strokeLinecap="round" strokeLinejoin="round"></path></g></svg>
-                </button>
-
-              </div>
-              {/* таблица */}
-              {!isTableNotEmpty ? (
-                    <center><p>Данных пока нет</p></center>
-                  ) : (
-              <table className="rtable">
-                <thead>
-                  <tr>
-                    <th className="col-code5" onClick={() => handleSort("id")}>
-                      Код
-                      {sortConfig.key === "id" && (
-                        <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
+                  {/* <th>Тип</th> */}
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {sortedAndFiltered.map((loc) => (
+                  <tr key={loc.id}>
+                    <td>{loc.id}</td>
+                    <td>
+                      {editRowId === loc.id ? (
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="form-control"
+                          style={{ height: 28 }}
+                        />
+                      ) : (
+                        <span>{loc.name}</span>
                       )}
-                    </th>
-                    <th className="col-name5" onClick={() => handleSort("name")}>
-                      Имя точки продаж
-                      {sortConfig.key === "name" && (
-                        <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
+                    </td>
+                    <td>
+                      {editRowId === loc.id ? (
+                        <input
+                          type="text"
+                          value={editAddress}
+                          onChange={(e) => setEditAddress(e.target.value)}
+                          className="form-control"
+                          style={{ height: 28 }}
+                        />
+                      ) : (
+                        <span>{loc.address}</span>
                       )}
-                    </th>
-                    <th className="col-grp5" onClick={() => handleSort("group")}>
-                      Адрес точки продаж
-                      {sortConfig.key === "address" && (
-                        <span>{sortConfig.direction === "ascending" ? " ▲" : " ▼"}</span>
+                    </td>
+                    {/* <td>
+                      {loc.type === "storage"
+                        ? "Склад"
+                        : loc.type === "salespoint"
+                        ? "Точка продаж"
+                        : loc.type}
+                    </td> */}
+                    <td style={{ textAlign: "center" }}>
+                      {editRowId === loc.id ? (
+                        <>
+                          <button
+                            className="btn-icon btn-success"
+                            onClick={() => handleSaveClick(loc.id)}
+                          >
+                            {/* галочка */}
+                            <svg
+                              width="25px" height="25px" viewBox="3.5 3 17 17"
+                              fill="none" xmlns="http://www.w3.org/2000/svg"
+                              stroke="#000000" strokeWidth="2.4"
+                            >
+                              <path
+                                d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
+                                stroke="#39bd00" strokeLinecap="round" strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-icon btn-warning"
+                            onClick={handleCancelClick}
+                          >
+                            {/* стрелка назад */}
+                            <svg
+                              width="25px" height="25px"
+                              viewBox="4.5 4.3 15 15"
+                              fill="none" xmlns="http://www.w3.org/2000/svg"
+                              stroke="#000000" strokeWidth="2.4"
+                              transform="rotate(270)"
+                            >
+                              <path
+                                d="M9.5 7L14.5 12L9.5 17"
+                                stroke="#000000" strokeLinecap="round" strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-icon btn-danger"
+                            onClick={() => handleDeleteClick(loc.id)}
+                          >
+                            {/* крестик */}
+                            <svg
+                              width="25px" height="25px"
+                              viewBox="3 3 17 17"
+                              fill="none" xmlns="http://www.w3.org/2000/svg"
+                              stroke="#000000" strokeWidth="2.4"
+                            >
+                              <path
+                                d="M7 17L16.8995 7.10051"
+                                stroke="#ff0000" strokeLinecap="round" strokeLinejoin="round"
+                              />
+                              <path
+                                d="M7 7.00001L16.8995 16.8995"
+                                stroke="#ff0000" strokeLinecap="round" strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            className="btn-icon btn-danger"
+                            onClick={() => handleEditClick(loc.id, loc.name, loc.address)}
+                          >
+                            {/* иконка редактирования */}
+                            <svg
+                              width="25px" height="25px"
+                              viewBox="3 3 18 18"
+                              fill="none" xmlns="http://www.w3.org/2000/svg"
+                              stroke="#000000" strokeWidth="1.6"
+                            >
+                              <path d="M6 12H18" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M6 15.5H18" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M6 8.5H18" stroke="#000000" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                        </>
                       )}
-                    </th>
-                    <th className='col-actions5'></th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {/* Строки с данными */}
-                  {sortedAndFilteredGroups.map((group) => (
-                    <tr
-                      key={group.id}
-                      onMouseEnter={() => setHoverRowId(group.id)} // При наведении сохраняем ID строки
-                      onMouseLeave={() => setHoverRowId(null)} // При уходе сбрасываем
-                    >
-                      <td td className='col-storage-code4, black, fnt'>{group.id}</td>
-                      <td td className='col-storage-name4, black'>
-                        {editRowId === group.id ? (
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="form-control"
-                            style={{
-                              height: 28
-                            }}
-                          />
-                        ) : (
-                          <span className='fnt'>{group.name}</span>
-                        )}
-                      </td>
-                      <td td className='col-storage-address4, black'>
-                        {editRowId === group.id ? (
-                          <input
-                            type="text"
-                            value={editAddress}
-                            onChange={(e) => setAddressValue(e.target.value)}
-                            className="form-control"
-                            style={{
-                              height: 28
-                            }}
-                          />
-                        ) : (
-                          <span className='fnt'>{group.address}</span>
-                        )}
-                      </td>
-                      <td className="col-actions-center">
-                        {editRowId === group.id ? (
-                          <>
-                            {/* Кнопка "Сохранить" */}
-                            <button
-                              className="btn-icon btn-success"
-                              onClick={() => handleSaveClick(group.id)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3.5 3 17 17"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
-                              >
-                                <path
-                                  d="M5 13.3636L8.03559 16.3204C8.42388 16.6986 9.04279 16.6986 9.43108 16.3204L19 7"
-                                  stroke="#39bd00"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-
-                            {/* Кнопка "Отмена" */}
-                            <button
-                              className="btn-icon btn-warning"
-                              onClick={handleCancelClick}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="4.5 4.3 15 15"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
-                                transform="rotate(270)"
-                              >
-                                <path
-                                  d="M9.5 7L14.5 12L9.5 17"
-                                  stroke="#000000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-                            {/* Кнопка "Удалить" */}
-                            <button
-                              className="btn-icon btn-danger"
-                              onClick={() => handleDeleteClick(group.id)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3 3 17 17"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="2.4"
-                              >
-                                <path
-                                  d="M7 17L16.8995 7.10051"
-                                  stroke="#ff0000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                                <path
-                                  d="M7 7.00001L16.8995 16.8995"
-                                  stroke="#ff0000"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                ></path>
-                              </svg>
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              className="btn-icon btn-danger"
-                              onClick={() => handleEditClick(group.id, group.name, group.address)}
-                            >
-                              <svg
-                                width="25px"
-                                height="25px"
-                                viewBox="3 3 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                stroke="#000000"
-                                strokeWidth="1.6"
-                              >
-                                <path d="M6 12H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 15.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M6 8.5H18" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"></path>                          </svg>
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-                  )}</>
-          )}{error && (
-            <>
-              <p style={{ color: 'red' }}>Ошибка: {error}</p>
-            </>
+                ))}
+              </tbody>
+            </table>
           )}
+          {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
         </div>
-      )
-      } {/*конец скрывающейся таблицы*/}
-    </div >
+      )}
+    </div>
   );
 }
 
-export default Storage;
+export default Locations;

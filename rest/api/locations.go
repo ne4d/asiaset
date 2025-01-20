@@ -3,15 +3,33 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterLocationsRoutes(r *gin.Engine, db *sql.DB) {
-
-	// API для получения всех записей locations
+	// GET /api/locations?type=storage|salespoint|...
 	r.GET("/api/locations", func(c *gin.Context) {
-		rows, err := db.Query("SELECT id, name, address, type FROM locations")
+		// Считываем ?type=...
+		filterType := c.Query("type") // например: "storage", "salespoint", ...
+
+		// Строим запрос
+		// Если filterType не пуст, добавим WHERE type = ...
+		// Иначе вернём все записи
+		baseQuery := "SELECT id, name, address, type FROM locations"
+		var rows *sql.Rows
+		var err error
+
+		if strings.TrimSpace(filterType) == "" {
+			// Без фильтра
+			rows, err = db.Query(baseQuery)
+		} else {
+			// С фильтром
+			query := baseQuery + " WHERE type = $1"
+			rows, err = db.Query(query, filterType)
+		}
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -20,10 +38,13 @@ func RegisterLocationsRoutes(r *gin.Engine, db *sql.DB) {
 
 		var records []map[string]interface{}
 		for rows.Next() {
-			var id int
-			var name, address, locationType string
-
-			if err := rows.Scan(&id, &name, &address, &locationType); err != nil {
+			var (
+				id    int
+				name  string
+				addr  string
+				ltype string
+			)
+			if err := rows.Scan(&id, &name, &addr, &ltype); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
@@ -31,80 +52,82 @@ func RegisterLocationsRoutes(r *gin.Engine, db *sql.DB) {
 			records = append(records, gin.H{
 				"id":      id,
 				"name":    name,
-				"address": address,
-				"type":    locationType, // Например, "storage" или "salespoint"
+				"address": addr,
+				"type":    ltype,
 			})
 		}
 
 		c.JSON(http.StatusOK, records)
 	})
 
-	// API для добавления новой записи
+	// POST /api/locations
 	r.POST("/api/locations", func(c *gin.Context) {
-		var input struct {
-			Name    string `json:"name"`
-			Address string `json:"address"`
-			Type    string `json:"type"` // storage или salespoint
-		}
-
-		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
-			return
-		}
-
-		// Проверяем, существует ли запись с таким именем и типом
-		var exists bool
-		err := db.QueryRow("SELECT EXISTS (SELECT 1 FROM locations WHERE name = $1 AND type = $2)", input.Name, input.Type).Scan(&exists)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка проверки уникальности: " + err.Error()})
-			return
-		}
-
-		if exists {
-			c.JSON(http.StatusConflict, gin.H{"error": "Запись с таким именем уже существует"})
-			return
-		}
-
-		// Добавляем запись
-		var id int
-		err = db.QueryRow("INSERT INTO locations (name, address, type) VALUES ($1, $2, $3) RETURNING id", input.Name, input.Address, input.Type).Scan(&id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "Запись успешно добавлена", "id": id})
-	})
-
-	// API для обновления записи
-	r.PUT("/api/locations/:id", func(c *gin.Context) {
-		id := c.Param("id")
 		var input struct {
 			Name    string `json:"name"`
 			Address string `json:"address"`
 			Type    string `json:"type"`
 		}
-
 		if err := c.BindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
 			return
 		}
 
-		_, err := db.Exec("UPDATE locations SET name = $1, address = $2, type = $3 WHERE id = $4", input.Name, input.Address, input.Type, id)
+		// Проверка на допустимые значения type (storage/salespoint/...)
+		// if input.Type != "storage" && input.Type != "salespoint" {
+		//     c.JSON(http.StatusBadRequest, gin.H{"error": "Недопустимый тип"})
+		//     return
+		// }
+
+		query := "INSERT INTO locations (name, address, type) VALUES ($1, $2, $3) RETURNING id"
+		var newID int
+		err := db.QueryRow(query, input.Name, input.Address, input.Type).Scan(&newID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка обновления записи: " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Запись успешно добавлена", "id": newID})
+	})
+
+	// PUT /api/locations/:id
+	r.PUT("/api/locations/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		var input struct {
+			Name    string `json:"name"`
+			Address string `json:"address"`
+			Type    string `json:"type"` // если хотим давать менять тип
+		}
+		if err := c.BindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
+			return
+		}
+
+		query := "UPDATE locations SET name=$1, address=$2, type=$3 WHERE id=$4"
+		res, err := db.Exec(query, input.Name, input.Address, input.Type, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Запись не найдена (или не изменена)"})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Запись успешно обновлена"})
 	})
 
-	// API для удаления записи
+	// DELETE /api/locations/:id
 	r.DELETE("/api/locations/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		_, err := db.Exec("DELETE FROM locations WHERE id = $1", id)
+		res, err := db.Exec("DELETE FROM locations WHERE id=$1", id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка удаления записи"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Запись не найдена"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Запись успешно удалена"})
