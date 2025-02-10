@@ -79,9 +79,9 @@ function SideMenu() {
             </Link>
           </li>
           <li className="darkerli">
-            <Link to="/0">
+            <Link to="/documentlist">
               <i className="fa fa-picture-o fa-lg"></i>
-              <span className="nav-text">-</span>
+              <span className="nav-text">Документы</span>
             </Link>
           </li>
           <li className="darkerli">

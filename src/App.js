@@ -14,6 +14,7 @@ import Analitic from './pages/Analitic';
 import Products from './pages/Products';
 import Setting from './pages/Setting';
 import ItemDetails from './pages/ItemDetails';
+import DocumentList from './pages/DocumentList';
 
 function App() {
   return (
@@ -38,7 +39,7 @@ function App() {
             <Route path="/order" element={<Order />} />
             <Route path="/analitic" element={<Analitic />} />
             <Route path="/0" element={<Products />} />
-            <Route path="/0" element={<Products />} />
+            <Route path="/documentlist" element={<DocumentList />} />
             <Route path="/0" element={<Products />} />
             <Route path="/0" element={<Products />} />
             <Route path="/0" element={<Products />} />

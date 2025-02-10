@@ -61,6 +61,7 @@ func main() {
 	api.RegisterCounterpartiesRoutes(r, db)
 	api.RegisterNomenklaturaDetailsRoutes(r, db)
 	api.RegisterLocationsRoutes(r, db)
+	api.RegisterDocumentsIncome(r, db)
 	// ... и т.д.
 
 	// Пример: можно зарегистрировать debug
