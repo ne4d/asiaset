@@ -320,30 +320,35 @@ function DocumentList() {
 
   // Сортировка и фильтрация документов
   const sortedAndFilteredDocuments = useMemo(() => {
-    let filtered = documents.filter(doc =>
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    if (!sortConfig.key) return filtered;
-    filtered.sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
-      if (typeof aVal === "number" && typeof bVal === "number") {
-        return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
-      } else {
-        return sortConfig.direction === "ascending"
-          ? String(aVal).localeCompare(String(bVal))
-          : String(bVal).localeCompare(String(aVal));
-      }
-    });
-    return filtered;
-  }, [documents, searchTerm, sortConfig]);
+  let filtered = documents.filter(doc =>
+    (doc.name || "").toLowerCase().includes((searchTerm || "").toLowerCase())
+  );
 
-  const handleSort = (key) => {
-    setSortConfig(prev => {
-      const newDir = (prev.key === key && prev.direction === "ascending") ? "descending" : "ascending";
-      return { key, direction: newDir };
-    });
-  };
+  if (!sortConfig.key) return filtered;
+
+  filtered.sort((a, b) => {
+    const aVal = a[sortConfig.key] || "";
+    const bVal = b[sortConfig.key] || "";
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
+    } else {
+      return sortConfig.direction === "ascending"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    }
+  });
+
+  return filtered;
+}, [documents, searchTerm, sortConfig]);
+
+const handleSort = (key) => {
+  setSortConfig(prev => {
+    const newDir = (prev.key === key && prev.direction === "ascending") ? "descending" : "ascending";
+    return { key, direction: newDir };
+  });
+};
+
+
 
   return (
     <div style={{ alignItems: "center" }}>
